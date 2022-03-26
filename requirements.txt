@@ -1,0 +1,10 @@
+gym[classic_control]~=0.20.0
+nevergrad~=0.5.0
+numpy~=1.22.3
+ray~=1.11.0
+seaborn~=0.11.2
+tensorboard
+torch~=1.9.1
+
+opencv-python~=4.5.3.56
+matplotlib~=3.5.0b1
