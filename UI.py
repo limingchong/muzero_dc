@@ -51,7 +51,7 @@ def window_1(games):
 
     combobox.grid(column=2, row=2)
 
-    B = Button(root, text="Next", width=10, pady=20, command=chooseGame)
+    B = Button(root, image="img/gomoku.png", text="Next", width=10, pady=20, command=chooseGame)
     B.grid(column=2, row=5)
     root.mainloop()
 
