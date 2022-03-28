@@ -1,9 +1,9 @@
 import random
 import numpy as np
 
-from Tank.DeadWall import DeadWall
-from Tank.Empty import Empty
-from Tank.Item import Item
+from games.Tank.DeadWall import DeadWall
+from games.Tank.Empty import Empty
+from games.Tank.Item import Item
 
 
 class Tank(Item):

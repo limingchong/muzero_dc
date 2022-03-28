@@ -1,8 +1,7 @@
 import tkinter as tk
-import matplotlib.pyplot as plt
 import numpy as np
 
-from Tank.Item import Item
+from games.Tank.Item import Item
 
 
 class GUI(tk.Tk, object):

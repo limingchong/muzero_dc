@@ -1,6 +1,4 @@
-import numpy as np
-
-from Tank.Item import Item
+from games.Tank.Item import Item
 
 
 class Empty(Item):

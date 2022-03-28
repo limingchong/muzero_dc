@@ -1,16 +1,15 @@
 import datetime
-import math
 import pathlib
 import numpy
 import torch
 import time
-from Tank.DeadWall import DeadWall
-from Tank.Empty import Empty
-from Tank.GUI import GUI
-from Tank.LiveWall import LiveWall
-from Tank.Tank import Tank
-import Tank.INIT_STATES as INIT_STATES
-from Tank.abstract_game import AbstractGame
+from games.Tank.Tank import DeadWall
+from games.Tank.Empty import Empty
+from games.Tank.Tank import GUI
+from games.Tank.Tank import LiveWall
+from games.Tank.Tank import Tank
+import games.Tank.INIT_STATES as INIT_STATES
+from games.Tank.Tank import AbstractGame
 
 
 END_SHOW = True

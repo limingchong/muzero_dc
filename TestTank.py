@@ -1,13 +1,11 @@
 import time
 
-import numpy as np
-
-from Tank.DeadWall import DeadWall
-from Tank.Empty import Empty
-from Tank.GUI import GUI
-import Tank.INIT_STATES as INIT_STATES
-from Tank.LiveWall import LiveWall
-from Tank.Tank import Tank
+from games.Tank.DeadWall import DeadWall
+from games.Tank.Empty import Empty
+from games.Tank.GUI import GUI
+import games.Tank.INIT_STATES as INIT_STATES
+from games.Tank.LiveWall import LiveWall
+from games.Tank.Tank import Tank
 
 END_SHOW = True
 PAUSE_TIME = 0
