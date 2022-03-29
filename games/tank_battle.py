@@ -20,8 +20,7 @@ EPOCH = 1000
 class tank_battle():
     def __init__(self, root):
         self.root = root
-        #self.root = root
-        root.clear()
+        root.clear_all()
 
     def train(self):
         muzero.MuZero("tank_battle")

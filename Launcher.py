@@ -1,9 +1,10 @@
 import os
 import tkinter
+
 import img
 from pathlib import Path
 from tkinter import *
-import games
+from games.gomoku import gomoku
 from games.tank_battle import tank_battle
 
 '''
@@ -74,16 +75,20 @@ class window(Tk):
         for opt in options:
             self.rightList.insert(END, opt)
 
-    def clear(self):
+    def clear_all(self):
         for widget in self.games_frame.winfo_children():
             widget.destroy()
 
     def click(self, evt):
-        print("evt:",evt)
-        print("widget",evt.widget)
+        print("evt:", evt)
+        print("widget", evt.widget)
 
         if str(evt.widget) == ".!frame.!button4":
             game = tank_battle(self)
+            game.test()
+
+        if str(evt.widget) == ".!frame.!button2":
+            game = gomoku(self)
             game.test()
 
         if evt.num == 3:
