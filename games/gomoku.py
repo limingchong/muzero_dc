@@ -6,7 +6,7 @@ import games.gomoku_dic.GUI as GUI
 class gomoku():
     def __init__(self, root):
         self.root = root
-        root.clear_all()
+        self.name = "gomoku"
 
     def train(self):
         pass

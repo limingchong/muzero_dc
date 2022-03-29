@@ -23,6 +23,8 @@ class window(Tk):
 
     def __init__(self):
         Tk.__init__(self)
+        self.games_frame = None
+        self.game = None
         self.geometry('{}x{}+{}+{}'.format(WINDOW_WIDTH,
                                            WINDOW_HEIGHT,
                                            int(self.winfo_screenwidth() / 2 - WINDOW_WIDTH / 2),
@@ -57,8 +59,8 @@ class window(Tk):
         self.tic_tac_toe =  Button(self.games_frame, image=image_tic_tac_toe, width=200, height=200)
         self.twenty_one =   Button(self.games_frame, image=image_twenty_one, width=200, height=200)
 
-        self.bind_all("<Button-1>", self.click)
-        self.bind_all("<Button-3>", self.click)
+        self.games_frame.bind_all("<Button-1>", self.click)
+        self.games_frame.bind_all("<Button-3>", self.click)
 
         self.window_title.grid(row=0, column=1)
         self.connect4.grid(row=1, column=0)
@@ -71,7 +73,7 @@ class window(Tk):
         self.games_frame.pack(padx=20, pady=20)
 
         options = ["训练", "测试", "修改", "详情"]
-        self.rightList = Listbox(self)
+        self.rightList = Listbox(self, font="黑体 16", height=4, width=4, borderwidth=0, bg="green")
         for opt in options:
             self.rightList.insert(END, opt)
 
@@ -79,25 +81,36 @@ class window(Tk):
         for widget in self.games_frame.winfo_children():
             widget.destroy()
 
-    def click(self, evt):
-        print("evt:", evt)
-        print("widget", evt.widget)
+    def click(self, e):
+        print("e:", e, "widget:", e.widget, "root:", [e.x_root, e.y_root])
 
-        if str(evt.widget) == ".!frame.!button4":
-            game = tank_battle(self)
-            game.test()
 
-        if str(evt.widget) == ".!frame.!button2":
-            game = gomoku(self)
-            game.test()
+        if str(e.widget) == ".!frame.!button4":
+            self.game = tank_battle(self)
 
-        if evt.num == 3:
-            self.rightList.place(x=evt.x, y=evt.y)
-        else:
-            self.rightList.place_forget()
+        if str(e.widget) == ".!frame.!button2":
+            self.game = gomoku(self)
 
-    def press(self):
-        print("command:")
+
+        if e.num == 1:
+            if self.game is None:
+                self.rightList.place_forget()
+            elif str(e.widget) == ".!listbox":
+                if self.rightList.curselection()[0] == 0:
+                    print("test", self.game.name)
+                if self.rightList.curselection()[0] == 1:
+                    print("train", self.game.name)
+                if self.rightList.curselection()[0] == 2:
+                    print("modify", self.game.name)
+                if self.rightList.curselection()[0] == 3:
+                    print("detail", self.game.name)
+            else:
+                self.game.test()
+
+            self.game = None
+
+        if e.num == 3:
+            self.rightList.place(x=e.x_root-self.winfo_x()-10, y=e.y_root-self.winfo_y()-25)
 
 
 if __name__ == "__main__":
