@@ -15,5 +15,5 @@ class DeadWall(Item):
             obj_center[0] - self.size, obj_center[1] - self.size,
             obj_center[0] + self.size, obj_center[1] + self.size,
             fill='black')
-        gui.allObject.append(self.obj)
+        gui.canvas.allObject.append(self.obj)
         return self.obj

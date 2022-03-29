@@ -45,7 +45,7 @@ class Tank(Item):
             obj_center[0] + arr[2] * self.size, obj_center[1] + arr[3] * self.size,
             obj_center[0] + arr[4] * self.size, obj_center[1] + arr[5] * self.size,
             fill=color)
-        gui.allObject.append(self.obj)
+        gui.canvas.allObject.append(self.obj)
         return self.obj
 
     def random_act(self, states):

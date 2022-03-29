@@ -30,8 +30,8 @@ class tank_battle():
         self.board = INIT_STATES.INIT_STATES
         tanks = []
         game_time = 0
-        self.root = GUI(self.root, 22, 22, 30, UNIT_SIZE)
-        #self.root.bind_all("<Key>",self.key_press)
+        self.canvas = GUI(self.root, 22, 22, 30, UNIT_SIZE)
+        self.root.bind_all("<Key>",self.key_press)
 
         for i in range(22):
             row = []
@@ -54,7 +54,7 @@ class tank_battle():
         while True:
             game_time += 1
             if PAUSE_TIME >= 0:
-                self.root.render(self.states)
+                self.canvas.render(self.states)
                 time.sleep(PAUSE_TIME)
 
             if type(self.states[tanks[0].x][tanks[0].y]) != Tank:

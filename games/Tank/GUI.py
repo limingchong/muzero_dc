@@ -4,14 +4,14 @@ from games.Tank.Item import Item
 from tkinter import *
 
 
-class GUI(Canvas):
+class GUI():
     unit = 40
     height = 22
     width = 22
     size = 15
 
     def __init__(self, r, a=22, b=22, c=40, d=15):
-        self = tk.Canvas(r, bg="white",
+        self.canvas = Canvas(r, bg="white",
                          height=a * c,
                          width=b * c)
 
@@ -20,15 +20,15 @@ class GUI(Canvas):
         self.width = b
         self.unit = c
         self.size = d
-        self.allObject = list()
+        self.canvas.allObject = list()
 
         r.geometry('{0}x{1}'.format(self.height * self.unit, self.height * self.unit))
 
     def render(self, states=(0 * np.arange(22 * 22).reshape(22, 22))):
         self.root.update()
-        for child in self.allObject:
+        for child in self.canvas.allObject:
             self.canvas.delete(child)
-        self.allObject.clear()
+        self.canvas.allObject.clear()
 
         # origin = np.array([self.height, self.width])
 
@@ -39,4 +39,4 @@ class GUI(Canvas):
                 item = states[i][j]
                 item.rend(self)
 
-        self.pack()
+        self.canvas.pack()

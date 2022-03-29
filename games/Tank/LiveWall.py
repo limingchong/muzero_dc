@@ -15,5 +15,5 @@ class LiveWall(Item):
             obj_center[0] - self.size, obj_center[1] - self.size,
             obj_center[0] + self.size, obj_center[1] + self.size,
             fill='yellow')
-        gui.allObject.append(self.obj)
+        gui.canvas.allObject.append(self.obj)
         return self.obj
