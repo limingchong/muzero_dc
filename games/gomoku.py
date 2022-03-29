@@ -1,7 +1,11 @@
-'''
+"""
 gomoku.py
-'''
+"""
+from tkinter import *
+
+
 import games.gomoku_dic.GUI as GUI
+
 
 class gomoku():
     def __init__(self, root):
@@ -12,7 +16,4 @@ class gomoku():
         pass
 
     def test(self):
-        GUI.GUI(self.root)
-
-
-
+        self.canvas = GUI.GUI(self.root)

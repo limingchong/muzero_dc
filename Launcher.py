@@ -77,8 +77,9 @@ class window(Tk):
         for opt in options:
             self.rightList.insert(END, opt)
 
+
     def clear_all(self):
-        for widget in self.games_frame.winfo_children():
+        for widget in self.winfo_children():
             widget.destroy()
 
     def click(self, e):
@@ -105,6 +106,7 @@ class window(Tk):
                 if self.rightList.curselection()[0] == 3:
                     print("detail", self.game.name)
             else:
+                self.clear_all()
                 self.game.test()
 
             self.game = None

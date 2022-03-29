@@ -1,33 +1,31 @@
 import tkinter as tk
 import numpy as np
-
 from games.Tank.Item import Item
+from tkinter import *
 
 
-class GUI(tk.Tk):
+class GUI(Canvas):
     unit = 40
     height = 22
     width = 22
     size = 15
 
-    def __init__(self, a=22, b=22, c=40, d=15, root=None):
-        super(GUI, self).__init__()
-        self = root
+    def __init__(self, r, a=22, b=22, c=40, d=15):
+        self = tk.Canvas(r, bg="white",
+                         height=a * c,
+                         width=b * c)
+
+        self.root = r
         self.height = a
         self.width = b
         self.unit = c
         self.size = d
         self.allObject = list()
-        self.canvas = tk.Canvas(self, bg="white",
-                                height=a * c,
-                                width=b * c)
-        self.action_space = ["up", "down", "left", "right"]
-        self.n_actions = len(self.action_space)
-        self.title("Battle")
-        self.geometry('{0}x{1}'.format(self.height * self.unit, self.height * self.unit))
+
+        r.geometry('{0}x{1}'.format(self.height * self.unit, self.height * self.unit))
 
     def render(self, states=(0 * np.arange(22 * 22).reshape(22, 22))):
-        self.update()
+        self.root.update()
         for child in self.allObject:
             self.canvas.delete(child)
         self.allObject.clear()
@@ -41,4 +39,4 @@ class GUI(tk.Tk):
                 item = states[i][j]
                 item.rend(self)
 
-        self.canvas.pack()
+        self.pack()
