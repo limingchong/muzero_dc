@@ -20,7 +20,11 @@ EPOCH = 1000
 class tank_battle():
     def __init__(self, root):
         self.root = root
-        root.clear_all()
+        self.clear_all()
+
+    def clear_all(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
 
     def train(self):
         muzero.MuZero("tank_battle")
@@ -30,7 +34,7 @@ class tank_battle():
         self.board = INIT_STATES.INIT_STATES
         tanks = []
         game_time = 0
-        self.root = GUI(22, 22, 30, UNIT_SIZE)
+        self.root = GUI(22, 22, 30, UNIT_SIZE, self.root)
         self.root.bind_all("<Key>",self.key_press)
 
         for i in range(22):

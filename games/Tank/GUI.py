@@ -4,14 +4,15 @@ import numpy as np
 from games.Tank.Item import Item
 
 
-class GUI(tk.Tk, object):
+class GUI(tk.Tk):
     unit = 40
     height = 22
     width = 22
     size = 15
 
-    def __init__(self, a=22, b=22, c=40, d=15):
+    def __init__(self, a=22, b=22, c=40, d=15, root=None):
         super(GUI, self).__init__()
+        self = root
         self.height = a
         self.width = b
         self.unit = c
