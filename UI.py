@@ -1,5 +1,6 @@
 import json
 import pathlib
+import tkinter
 from tkinter import *
 from tkinter import ttk
 
@@ -35,7 +36,13 @@ def window_1(games):
     root.title("muzero")
     screenwidth = root.winfo_screenwidth()
     screenheight = root.winfo_screenheight()
-    root.geometry('{}x{}+{}+{}'.format(WINDOW_WIDTH, WINDOW_HEIGHT, 0, 0))
+    width = 600
+    height = 500
+    x = int((screenwidth - width) / 2)
+    y = int((screenheight - height) / 2)
+    label = Label(root, text=" ", height=5, width=8, font='Arial 20 bold')
+    label.grid(column=1, row=4)
+    root.geometry('{}x{}+{}+{}'.format(width, height, x, y))
     L1 = Label(root, text="Welcome to MuZero!\nHere's a list of games:", height=5, font='Arial 20 bold')
     L1.grid(column=2, row=1)
     global combobox
@@ -50,8 +57,8 @@ def window_1(games):
     )
 
     combobox.grid(column=2, row=2)
-
-    B = Button(root, image="img/gomoku_dic.png", text="Next", width=10, pady=20, command=chooseGame)
+    image_gomoku = tkinter.PhotoImage(file="img/gomoku.png")
+    B = Button(root, text="Next", width=10, pady=20, command=chooseGame)
     B.grid(column=2, row=5)
     root.mainloop()
 
@@ -60,7 +67,7 @@ def chooseGame():
     global game_name
     global muzero
     game_name = combobox.get()
-    #muzero = MuZero(game_name)
+    muzero = MuZero(game_name)
     root.destroy()
     window_2(game_name)
 
