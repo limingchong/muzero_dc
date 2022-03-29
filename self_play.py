@@ -277,8 +277,9 @@ class MCTS:
             root_predicted_value = None
         else:
             root = Node(0)
+            tmp = numpy.array(observation)
             observation = (
-                torch.tensor(observation)
+                torch.tensor(tmp)
                 .float()
                 .unsqueeze(0)
                 .to(next(model.parameters()).device)
