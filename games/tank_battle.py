@@ -1,18 +1,20 @@
 '''
     tank_battle.py
 '''
-import muzero
+import threading
 import time
+
+from tkinter import *
+import games.Tank.INIT_STATES as INIT_STATES
+import muzero
 from games.Tank.DeadWall import DeadWall
 from games.Tank.Empty import Empty
 from games.Tank.GUI import GUI
-import games.Tank.INIT_STATES as INIT_STATES
 from games.Tank.LiveWall import LiveWall
 from games.Tank.Tank import Tank
-import tkinter
 
 END_SHOW = True
-PAUSE_TIME = 0.01
+PAUSE_TIME = 0.1
 UNIT_SIZE = 15
 EPOCH = 1000
 
@@ -30,8 +32,7 @@ class tank_battle():
         self.board = INIT_STATES.INIT_STATES
         tanks = []
         game_time = 0
-        self.canvas = GUI(self.root, 22, 22, 30, UNIT_SIZE)
-        self.root.bind_all("<Key>",self.key_press)
+        self.root.bind_all("<Key>", self.key_press)
 
         for i in range(22):
             row = []
@@ -50,22 +51,11 @@ class tank_battle():
                     row.append(Empty(i, j, UNIT_SIZE))
             self.states.append(row)
 
+        self.canvas = GUI(self.root, self.states, 22, 22, 30, UNIT_SIZE)
+
         self.me = tanks[0]
-        while True:
-            game_time += 1
-            if PAUSE_TIME >= 0:
-                self.canvas.render(self.states)
-                time.sleep(PAUSE_TIME)
-
-            if type(self.states[tanks[0].x][tanks[0].y]) != Tank:
-                print(" Tank 1 win.")
-                break
-
-            if type(self.states[tanks[1].x][tanks[1].y]) == Tank:
-                tanks[1].random_act(self.states)
-            else:
-                print("Tank 0 win.")
-                break
+        self.testing = True
+        Worker(PAUSE_TIME, tanks[1], self.states)
 
     def key_press(self, e):
         if e.keysym == "space":
@@ -80,4 +70,26 @@ class tank_battle():
         if e.keysym == "Right":
             self.me.rotate(1, self.board)
 
+        if e.keysym == "Escape":
+            self.testing = False
+            print("close")
+            self.root.setObjects()
 
+        time.sleep(PAUSE_TIME)
+
+
+class Worker(threading.Thread):
+    def __init__(self, delay, tank, states):
+        threading.Thread.__init__(self)
+        threading.Thread()
+        self.tank = tank
+        self.states = states
+        self.delay = delay
+        self.start()
+
+    def run(self):
+        while type(self.states[self.tank.x][self.tank.y]) == Tank:
+            self.tank.random_act(self.states)
+            time.sleep(self.delay)
+        else:
+            print("Tank 0 win.")

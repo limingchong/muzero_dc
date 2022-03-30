@@ -1,40 +1,30 @@
-#!/usr/bin/python3
-
-import threading
 import time
+import threading
+import queue
 
-exitFlag = 0
-
-
-class myThread(threading.Thread):
-    def __init__(self, threadID, name, delay):
+class Worker(threading.Thread):
+    def __init__(self, name, queue, delay):
         threading.Thread.__init__(self)
-        self.threadID = threadID
-        self.name = name
+        threading.Thread()
+        self.queue = queue
         self.delay = delay
+        self.start()    #执行run()
 
     def run(self):
-        print("开始线程：" + self.name)
-        print_time(self.name, self.delay, 5)
-        print("退出线程：" + self.name)
+        #循环，保证接着跑下一个任务
+        while True:
+            # 队列为空则退出线程
+            if self.queue == 0:
+                break
+            time.sleep(self.delay)
+            # 打印
+            print(self.getName() + " process " + str(self.queue))
+            # 任务完成
+            self.queue -= 1
 
 
-def print_time(threadName, delay, counter):
-    while counter:
-        if exitFlag:
-            threadName.exit()
-        time.sleep(delay)
-        print("%s: %s" % (threadName, time.ctime(time.time())))
-        counter -= 1
-
-
-# 创建新线程
-thread1 = myThread(1, "Thread-1", 0)
-thread2 = myThread(2, "Thread-2", 0)
-
-# 开启新线程
-thread1.start()
-thread2.start()
-thread1.join()
-thread2.join()
-print("退出主线程")
+# 队列
+queue = 10
+for i in range(2):
+    threadName = 'Thread' + str(i)
+    Worker(threadName, queue, 0.1)

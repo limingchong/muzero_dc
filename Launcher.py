@@ -77,6 +77,8 @@ class window(Tk):
         for opt in options:
             self.rightList.insert(END, opt)
 
+        self.update()
+
 
     def clear_all(self):
         for widget in self.winfo_children():
