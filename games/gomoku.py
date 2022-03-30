@@ -35,6 +35,7 @@ class gomoku:
 
         self.root.games_frame.unbind_all("<Button>")
         self.root.bind_all("<Button>", self.button_press)
+        self.root.bind_all("<Key>", self.key_press)
 
         while self.testing:
             self.canvas.render(self.states)
@@ -47,10 +48,13 @@ class gomoku:
                 self.new_piece(x, y, 'white')
                 self.play = True
 
+        self.root.clear_all()
+        self.root.setObjects()
+
     def button_press(self, e):
-        if self.play:
-            x = int(11 * e.x / self.canvas.width / self.canvas.unit)
-            y = int(11 * e.y / self.canvas.height / self.canvas.unit)
+        x = int(11 * e.x / self.canvas.width / self.canvas.unit)
+        y = int(11 * e.y / self.canvas.height / self.canvas.unit)
+        if self.play and type(self.states[x][y]) is Empty.Empty:
             self.new_piece(x, y, 'black')
             self.play = False
 
@@ -75,3 +79,7 @@ class gomoku:
                 return False
 
         return True
+
+    def key_press(self, e):
+        if e.keysym == "Escape":
+            self.testing = False
