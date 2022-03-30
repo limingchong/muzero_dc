@@ -5,6 +5,7 @@ import img
 from pathlib import Path
 from tkinter import *
 from games.gomoku import gomoku
+from games.pong import pong
 from games.tank_battle import tank_battle
 
 '''
@@ -53,6 +54,13 @@ class window(Tk):
         image_tic_tac_toe = tkinter.PhotoImage(file="img/tic_tac_toe.png")
         image_twenty_one = tkinter.PhotoImage(file="img/twenty_one.png")
 
+        image_connect4 = image_connect4.subsample(int(image_connect4.width()/200))
+        image_gomoku = image_gomoku.subsample(int(image_gomoku.width()/200))
+        image_pong = image_pong.subsample(int(image_pong.width()/200))
+        image_tank_wars = image_tank_wars.subsample(int(image_tank_wars.width()/200))
+        image_tic_tac_toe = image_tic_tac_toe.subsample(int(image_tic_tac_toe.width()/200))
+        image_twenty_one = image_twenty_one.subsample(int(image_twenty_one.width()/200))
+
         self.connect4 = Button(self.games_frame, image=image_connect4, width=200, height=200)
         self.gomoku = Button(self.games_frame, image=image_gomoku, width=200, height=200)
         self.pong = Button(self.games_frame, image=image_pong, width=200, height=200)
@@ -70,7 +78,7 @@ class window(Tk):
         self.tic_tac_toe.grid(row=2, column=1)
         self.twenty_one.grid(row=2, column=2)
 
-        self.games_frame.pack(padx=20, pady=20)
+        self.games_frame.pack(padx=10, pady=10)
 
         options = ["训练", "测试", "修改", "详情"]
         self.rightList = Listbox(self, font="黑体 16", height=4, width=4, borderwidth=0, bg="green")
@@ -86,10 +94,15 @@ class window(Tk):
     def click(self, e):
         print("e:", e, "widget:", e.widget, "root:", [e.x_root, e.y_root])
 
-        if str(e.widget)[-7: len(str(e.widget))] == "button4":
-            self.game = tank_battle(self)
+        if str(e.widget)[-7: len(str(e.widget))] == "button":
+            pass
         elif str(e.widget)[-7: len(str(e.widget))] == "button2":
             self.game = gomoku(self)
+        elif str(e.widget)[-7: len(str(e.widget))] == "button3":
+            self.game = pong(self)
+        elif str(e.widget)[-7: len(str(e.widget))] == "button4":
+            self.game = tank_battle(self)
+
 
 
         if e.num == 1:
