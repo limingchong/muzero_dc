@@ -6,16 +6,13 @@ from games.Tank.Item import Item
 from tkinter import *
 
 
-class GUI(threading.Thread):
+class GUI:
     unit = 40
     height = 22
     width = 22
     size = 15
 
-    def __init__(self, r, states, a=22, b=22, c=40, d=15, delay=0.01):
-        threading.Thread.__init__(self)
-        threading.Thread()
-        self.delay = delay
+    def __init__(self, r, states, a=22, b=22, c=40, d=15):
         self.canvas = Canvas(r, bg="white",
                              height=a * c,
                              width=b * c)
@@ -29,12 +26,7 @@ class GUI(threading.Thread):
         self.canvas.allObject = list()
 
         r.geometry('{0}x{1}'.format(self.height * self.unit, self.height * self.unit))
-        self.start()
 
-    def run(self):
-        while True:
-            self.render(self.states)
-            time.sleep(self.delay)
 
     def render(self, states=(0 * np.arange(22 * 22).reshape(22, 22))):
         self.root.update()

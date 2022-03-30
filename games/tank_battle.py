@@ -22,6 +22,7 @@ EPOCH = 1000
 class tank_battle():
     def __init__(self, root):
         self.root = root
+        self.last_press_time = 0
         root.clear_all()
 
     def train(self):
@@ -52,30 +53,34 @@ class tank_battle():
             self.states.append(row)
 
         self.canvas = GUI(self.root, self.states, 22, 22, 30, UNIT_SIZE)
-
         self.me = tanks[0]
         self.testing = True
-        Worker(PAUSE_TIME, tanks[1], self.states)
+        worker = Worker(PAUSE_TIME, tanks[1], self.states)
+        worker.start()
+
+        while self.testing:
+            self.canvas.render(self.states)
 
     def key_press(self, e):
-        if e.keysym == "space":
-            self.me.shoot(self.states, self.board)
+        if time.time() - self.last_press_time> PAUSE_TIME:
+            if e.keysym == "space":
+                self.me.shoot(self.states, self.board)
 
-        if e.keysym == "Up" and self.me.forwardTest(self.states):
-            self.me.forward(self.states, self.board)
+            if e.keysym == "Up" and self.me.forwardTest(self.states):
+                self.me.forward(self.states, self.board)
 
-        if e.keysym == "Left":
-            self.me.rotate(-1, self.board)
+            if e.keysym == "Left":
+                self.me.rotate(-1, self.board)
 
-        if e.keysym == "Right":
-            self.me.rotate(1, self.board)
+            if e.keysym == "Right":
+                self.me.rotate(1, self.board)
 
-        if e.keysym == "Escape":
-            self.testing = False
-            print("close")
-            self.root.setObjects()
+            if e.keysym == "Escape":
+                self.testing = False
+                print("close")
+                self.root.setObjects()
 
-        time.sleep(PAUSE_TIME)
+            self.last_press_time = time.time()
 
 
 class Worker(threading.Thread):
@@ -85,7 +90,6 @@ class Worker(threading.Thread):
         self.tank = tank
         self.states = states
         self.delay = delay
-        self.start()
 
     def run(self):
         while type(self.states[self.tank.x][self.tank.y]) == Tank:
