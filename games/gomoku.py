@@ -10,6 +10,7 @@ import games.gomoku_dic.GUI as GUI
 import games.gomoku_dic.Piece as Piece
 import games.gomoku_dic.Empty as Empty
 
+
 class gomoku:
     def __init__(self, root):
         self.testing = True
@@ -60,25 +61,30 @@ class gomoku:
 
     def new_piece(self, x, y, color):
         self.states[x][y] = Piece.Piece(10, color)
-        print(color, self.judge_all(x, y))
+        if self.judge_all(x, y):
+            print(color, "win.")
 
     def judge_all(self, x0, y0):
-        for i in (-1, 0, 1):
-            for j in (-1, 0, 1):
-                if i != 0 or j != 0:
-                    if self.judge(x0, y0, i, j):
-                        return True
+        for (i, j) in ((1, 0), (0, 1), (1, -1), (1, 1)):
+            if self.judge(x0, y0, i, j):
+                return True
 
         return False
 
     def judge(self, x0, y0, dx, dy):
+        total = 0
         for i in range(1, 5):
-            if x0 + dx * i > 10 or y0 + dy * i > 10 or x0 + dx * i < 0 or y0 + dy * i < 0:
-                return False
-            if self.states[x0 + dx * i][y0 + dy * i].color != self.states[x0][y0].color:
-                return False
+            if x0 + dx * i > 10 or y0 + dy * i > 10 or x0 + dx * i < 0 or y0 + dy * i < 0 or\
+                    self.states[x0 + dx * i][y0 + dy * i].color != self.states[x0][y0].color:
+                break
+            total += 1
+        for i in range(1, 5):
+            if x0 - dx * i > 10 or y0 - dy * i > 10 or x0 - dx * i < 0 or y0 - dy * i < 0 or \
+                    self.states[x0 - dx * i][y0 - dy * i].color != self.states[x0][y0].color:
+                break
+            total += 1
 
-        return True
+        return total > 3
 
     def key_press(self, e):
         if e.keysym == "Escape":
