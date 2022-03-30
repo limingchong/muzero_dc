@@ -19,8 +19,9 @@ UNIT_SIZE = 15
 EPOCH = 1000
 
 
-class tank_battle():
+class tank_battle:
     def __init__(self, root):
+        self.testing = None
         self.root = root
         self.last_press_time = 0
         root.clear_all()
@@ -33,7 +34,6 @@ class tank_battle():
         self.board = INIT_STATES.INIT_STATES
         tanks = []
         game_time = 0
-        self.root.bind_all("<Key>", self.key_press)
 
         for i in range(22):
             row = []
@@ -53,16 +53,21 @@ class tank_battle():
             self.states.append(row)
 
         self.canvas = GUI(self.root, self.states, 22, 22, 30, UNIT_SIZE)
+        self.root.games_frame.unbind_all("<Button>")
+        self.root.bind_all("<Key>", self.key_press)
         self.me = tanks[0]
         self.testing = True
-        worker = Worker(PAUSE_TIME, tanks[1], self.states)
+        worker = Worker(PAUSE_TIME, tanks[1], self.states, self)
         worker.start()
 
         while self.testing:
             self.canvas.render(self.states)
 
+        self.root.clear_all()
+        self.root.setObjects()
+
     def key_press(self, e):
-        if time.time() - self.last_press_time> PAUSE_TIME:
+        if time.time() - self.last_press_time > PAUSE_TIME:
             if e.keysym == "space":
                 self.me.shoot(self.states, self.board)
 
@@ -77,23 +82,23 @@ class tank_battle():
 
             if e.keysym == "Escape":
                 self.testing = False
-                print("close")
-                self.root.setObjects()
 
             self.last_press_time = time.time()
 
 
 class Worker(threading.Thread):
-    def __init__(self, delay, tank, states):
+    def __init__(self, delay, tank, states, root):
         threading.Thread.__init__(self)
         threading.Thread()
         self.tank = tank
         self.states = states
         self.delay = delay
+        self.root = root
 
     def run(self):
-        while type(self.states[self.tank.x][self.tank.y]) == Tank:
-            self.tank.random_act(self.states)
-            time.sleep(self.delay)
-        else:
-            print("Tank 0 win.")
+        while self.root.testing:
+            if type(self.states[self.tank.x][self.tank.y]) == Tank:
+                self.tank.random_act(self.states)
+                time.sleep(self.delay)
+            else:
+                print("Tank 0 win.")

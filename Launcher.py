@@ -25,15 +25,16 @@ class window(Tk):
         Tk.__init__(self)
         self.games_frame = None
         self.game = None
+        self.setObjects()
+        self.mainloop()
+
+    def setObjects(self):
         self.geometry('{}x{}+{}+{}'.format(WINDOW_WIDTH,
                                            WINDOW_HEIGHT,
                                            int(self.winfo_screenwidth() / 2 - WINDOW_WIDTH / 2),
                                            int(self.winfo_screenheight() / 2 - WINDOW_HEIGHT / 2)))
         self.title("基于强化学习的攻防系统")
-        self.setObjects()
-        self.mainloop()
 
-    def setObjects(self):
         self.games_frame = Frame(self)
 
         self.window_title = Label(self.games_frame, text="基于强化学习的攻防系统", font="黑体 25")
@@ -59,8 +60,7 @@ class window(Tk):
         self.tic_tac_toe =  Button(self.games_frame, image=image_tic_tac_toe, width=200, height=200)
         self.twenty_one =   Button(self.games_frame, image=image_twenty_one, width=200, height=200)
 
-        self.games_frame.bind_all("<Button-1>", self.click)
-        self.games_frame.bind_all("<Button-3>", self.click)
+        self.games_frame.bind_all("<Button>", self.click)
 
         self.window_title.grid(row=0, column=1)
         self.connect4.grid(row=1, column=0)
