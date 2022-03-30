@@ -53,12 +53,12 @@ class window(Tk):
         image_tic_tac_toe = tkinter.PhotoImage(file="img/tic_tac_toe.png")
         image_twenty_one = tkinter.PhotoImage(file="img/twenty_one.png")
 
-        self.connect4 =     Button(self.games_frame, image=image_connect4, width=200, height=200)
-        self.gomoku =       Button(self.games_frame, image=image_gomoku, width=200, height=200)
-        self.pong =         Button(self.games_frame, image=image_pong, width=200, height=200)
-        self.tank_wars =    Button(self.games_frame, image=image_tank_wars, width=200, height=200)
-        self.tic_tac_toe =  Button(self.games_frame, image=image_tic_tac_toe, width=200, height=200)
-        self.twenty_one =   Button(self.games_frame, image=image_twenty_one, width=200, height=200)
+        self.connect4 = Button(self.games_frame, image=image_connect4, width=200, height=200)
+        self.gomoku = Button(self.games_frame, image=image_gomoku, width=200, height=200)
+        self.pong = Button(self.games_frame, image=image_pong, width=200, height=200)
+        self.tank_wars = Button(self.games_frame, image=image_tank_wars, width=200, height=200)
+        self.tic_tac_toe = Button(self.games_frame, image=image_tic_tac_toe, width=200, height=200)
+        self.twenty_one = Button(self.games_frame, image=image_twenty_one, width=200, height=200)
 
         self.games_frame.bind_all("<Button>", self.click)
 
@@ -79,7 +79,6 @@ class window(Tk):
 
         self.update()
 
-
     def clear_all(self):
         for widget in self.winfo_children():
             widget.destroy()
@@ -87,11 +86,9 @@ class window(Tk):
     def click(self, e):
         print("e:", e, "widget:", e.widget, "root:", [e.x_root, e.y_root])
 
-
-        if str(e.widget) == ".!frame.!button4":
+        if str(e.widget)[-7: len(str(e.widget))] == "button4":
             self.game = tank_battle(self)
-
-        if str(e.widget) == ".!frame.!button2":
+        elif str(e.widget)[-7: len(str(e.widget))] == "button2":
             self.game = gomoku(self)
 
 
@@ -108,13 +105,14 @@ class window(Tk):
                 if self.rightList.curselection()[0] == 3:
                     print("detail", self.game.name)
             else:
+                print("test", self.game.name)
                 self.clear_all()
                 self.game.test()
 
             self.game = None
 
         if e.num == 3:
-            self.rightList.place(x=e.x_root-self.winfo_x()-10, y=e.y_root-self.winfo_y()-25)
+            self.rightList.place(x=e.x_root - self.winfo_x() - 10, y=e.y_root - self.winfo_y() - 25)
 
 
 if __name__ == "__main__":

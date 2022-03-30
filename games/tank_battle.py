@@ -23,6 +23,7 @@ class tank_battle:
     def __init__(self, root):
         self.testing = None
         self.root = root
+        self.name = "tank_battle"
         self.last_press_time = 0
         root.clear_all()
 
