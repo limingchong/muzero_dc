@@ -8,6 +8,7 @@ class Pat(Item):
         self.obj = None
 
     def rend(self, gui):
+        self.accelerate()
         obj_center = (self.x, self.y)
         self.obj = gui.canvas.create_rectangle(
             obj_center[0] - self.size / 3, obj_center[1] - 3 * self.size,
