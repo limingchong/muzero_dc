@@ -1,5 +1,6 @@
 import numpy
 
+
 class Piece:
     def __init__(self, size, color):
         self.size = size

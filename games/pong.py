@@ -1,6 +1,6 @@
-'''
+"""
 pong.py
-'''
+"""
 import random
 import threading
 import time
@@ -9,7 +9,7 @@ from games.pong_dic.Ball import Ball
 from games.pong_dic.GUI import GUI
 from games.pong_dic.Pat import Pat
 
-PAUSE_TIME = 0.05
+PAUSE_TIME = 0.5
 
 
 class pong:
@@ -60,14 +60,14 @@ class pong:
 
     def bounce(self):
         if self.states[1].x < 50:
-            if self.states[0].y - 3 * self.states[0].size < self.states[1].y and self.states[1].y < self.states[
-                0].y + 3 * self.states[0].size:
+            if self.states[0].y - 3 * self.states[0].size < self.states[1].y < \
+                    self.states[0].y + 3 * self.states[0].size:
                 self.states[1].v_y += self.states[1].y - self.states[0].y
                 self.states[1].v_x = -self.states[1].v_x
 
         if self.states[1].x > 550:
-            if self.states[2].y - 3 * self.states[2].size < self.states[1].y and self.states[1].y < self.states[
-                0].y + 3 * self.states[0].size:
+            if self.states[2].y - 3 * self.states[2].size < self.states[1].y < \
+                    self.states[0].y + 3 * self.states[0].size:
                 self.states[1].v_y += self.states[1].y - self.states[0].y
                 self.states[1].v_x = -self.states[1].v_x
 

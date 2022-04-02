@@ -7,6 +7,7 @@ from tkinter import *
 from games.gomoku import gomoku
 from games.pong import pong
 from games.tank_battle import tank_battle
+from games.twentyone import twentyone
 
 '''
     Author: Mingchong Li
@@ -102,6 +103,8 @@ class window(Tk):
             self.game = pong(self)
         elif str(e.widget)[-7: len(str(e.widget))] == "button4":
             self.game = tank_battle(self)
+        elif str(e.widget)[-7: len(str(e.widget))] == "button6":
+            self.game = twentyone(self)
 
 
 
