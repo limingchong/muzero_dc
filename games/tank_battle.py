@@ -25,12 +25,12 @@ class tank_battle:
         self.root = root
         self.name = "tank_battle"
         self.last_press_time = 0
-        root.clear_all()
 
     def train(self):
         muzero.MuZero("tank_battle")
 
     def test(self):
+        self.root.clear_all()
         self.states = []
         self.board = INIT_STATES.INIT_STATES
         tanks = []
