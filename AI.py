@@ -1,4 +1,7 @@
 import math
+import pathlib
+import pickle
+
 import numpy
 import torch
 import models
@@ -22,7 +25,7 @@ class CPUActor:
 class AI:
     def __init__(self, game, config, seed):
         self.config = config
-        checkpoint = {
+        self.checkpoint = {
             "weights": None,
             "optimizer_state": None,
             "total_reward": 0,
@@ -45,15 +48,59 @@ class AI:
 
         cpu_actor = CPUActor.remote()
         cpu_weights = cpu_actor.get_initial_weights.remote(self.config)
-        checkpoint["weights"], self.summary = copy.deepcopy(ray.get(cpu_weights))
+        self.checkpoint["weights"], self.summary = copy.deepcopy(ray.get(cpu_weights))
 
         numpy.random.seed(seed)
         torch.manual_seed(seed)
         self.model = models.MuZeroNetwork(self.config)
-        self.model.set_weights(checkpoint["weights"])
+        self.model.set_weights(self.checkpoint["weights"])
         self.model.to(torch.device("cuda" if self.config.selfplay_on_gpu else "cpu"))
         self.model.eval()
         self.game = game
+        self.load_model()
+
+    def load_model(self, checkpoint_path=None, replay_buffer_path=None):
+        """
+        Load a model and/or a saved replay buffer.
+
+        Args:
+            checkpoint_path (str): Path to model.checkpoint or model.weights.
+
+            replay_buffer_path (str): Path to replay_buffer.pkl
+        """
+        checkpoint_path = "results\\tictactoe\\2022-04-09--09-47-00\\model.checkpoint"
+        replay_buffer_path = "results\\tictactoe\\2022-04-09--09-47-00\\replay_buffer.pkl"
+
+        # Load checkpoint
+        if checkpoint_path:
+            checkpoint_path = pathlib.Path(checkpoint_path)
+            self.checkpoint = torch.load(checkpoint_path)
+            print(f"\nUsing checkpoint from {checkpoint_path}")
+
+        # Load replay buffer
+        if replay_buffer_path:
+            replay_buffer_path = pathlib.Path(replay_buffer_path)
+            with open(replay_buffer_path, "rb") as f:
+                replay_buffer_infos = pickle.load(f)
+            self.replay_buffer = replay_buffer_infos["buffer"]
+            self.checkpoint["num_played_steps"] = replay_buffer_infos[
+                "num_played_steps"
+            ]
+            self.checkpoint["num_played_games"] = replay_buffer_infos[
+                "num_played_games"
+            ]
+            self.checkpoint["num_reanalysed_games"] = replay_buffer_infos[
+                "num_reanalysed_games"
+            ]
+
+            print(f"\nInitializing replay buffer with {replay_buffer_path}")
+        else:
+            print(f"Using empty buffer.")
+            self.replay_buffer = {}
+            self.checkpoint["training_step"] = 0
+            self.checkpoint["num_played_steps"] = 0
+            self.checkpoint["num_played_games"] = 0
+            self.checkpoint["num_reanalysed_games"] = 0
 
     def get_action(self, game_history):
         root, mcts_info = MCTS(self.config).run(

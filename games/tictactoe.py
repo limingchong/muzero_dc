@@ -11,6 +11,7 @@ from games.tictactoe_dic.Piece import Piece
 from tkinter import *
 from games.tictactoe_dic.GUI import GUI
 
+
 class MuZeroConfig:
     def __init__(self):
         # fmt: off
@@ -266,9 +267,9 @@ class TicTacToe:
         return self.get_observation(), reward, done
 
     def get_observation(self):
-        board_player1 = numpy.where(self.board == 1, 1, 0)      # ai have put = 1 others 0
-        board_player2 = numpy.where(self.board == -1, 1, 0)     # human have put = 1 others 0
-        board_to_play = numpy.full((3, 3), self.player)         # if this is human = 1 or -1
+        board_player1 = numpy.where(self.board == 1, 1, 0)  # ai have put = 1 others 0
+        board_player2 = numpy.where(self.board == -1, 1, 0)  # human have put = 1 others 0
+        board_to_play = numpy.full((3, 3), self.player)  # if this is human = 1 or -1
         return numpy.array([board_player1, board_player2, board_to_play], dtype="int32")
 
     def legal_actions(self):
@@ -290,15 +291,15 @@ class TicTacToe:
 
         # Diagonal checks
         if (
-            self.board[0, 0] == self.player
-            and self.board[1, 1] == self.player
-            and self.board[2, 2] == self.player
+                self.board[0, 0] == self.player
+                and self.board[1, 1] == self.player
+                and self.board[2, 2] == self.player
         ):
             return True
         if (
-            self.board[2, 0] == self.player
-            and self.board[1, 1] == self.player
-            and self.board[0, 2] == self.player
+                self.board[2, 0] == self.player
+                and self.board[1, 1] == self.player
+                and self.board[0, 2] == self.player
         ):
             return True
 
@@ -349,6 +350,7 @@ class TicTacToe:
     def render(self):
         print(self.board[::-1])
 
+
 class tictactoe_gui:
     def __init__(self, root):
         self.root = root
@@ -381,8 +383,12 @@ class tictactoe_gui:
             if not self.play:
                 action, root = self.ai.get_action(self.game_history)
                 self.new_piece(action // 3, action % 3, 'white')
-                self.ai.update_history(action, root, self.game_history, 1 if self.judge_all(action // 3, action % 3) else 0, 1)
+                self.ai.update_history(action, root, self.game_history,
+                                       1 if self.judge_all(action // 3, action % 3) else 0, 1)
                 self.play = True
+
+        self.root.clear_all()
+        self.root.setObjects()
 
     def get_legal_actions(self):
         actions = []
