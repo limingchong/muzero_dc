@@ -1,9 +1,15 @@
 import datetime
 import math
 import pathlib
-
+import random
+from games.gomoku_dic.GUI import GUI
+from games.gomoku_dic.Empty import Empty
+from games.gomoku_dic.Piece import Piece
 import numpy
+from Launcher import MuZero
 import torch
+from AI import *
+
 
 from games.abstract_game import AbstractGame
 
@@ -16,10 +22,9 @@ class MuZeroConfig:
         self.seed = 0  # Seed for numpy, torch and the game
         self.max_num_gpus = None  # Fix the maximum number of GPUs to use. It's usually faster to use a single GPU (set it to 1) if it has enough memory. None will use every GPUs available
 
-
-
         ### Game
-        self.observation_shape = (3, 11, 11)  # Dimensions of the game observation, must be 3 (channel, height, width). For a 1D array, please reshape it to (1, 1, length of array)
+        self.observation_shape = (3, 11,
+                                  11)  # Dimensions of the game observation, must be 3 (channel, height, width). For a 1D array, please reshape it to (1, 1, length of array)
         self.action_space = list(range(11 * 11))  # Fixed list of all possible actions. You should only edit the length
         self.players = list(range(2))  # List of players. You should only edit the length
         self.stacked_observations = 0  # Number of previous observations and previous actions to add to the current observation
@@ -27,8 +32,6 @@ class MuZeroConfig:
         # Evaluate
         self.muzero_player = 0  # Turn Muzero begins to play (0: MuZero plays first, 1: MuZero plays second)
         self.opponent = "random"  # Hard coded agent that MuZero faces to assess his progress in multiplayer games. It doesn't influence training. None, "random" or "expert" if implemented in the Game class
-
-
 
         ### Self-Play
         self.num_workers = 2  # Number of simultaneous threads/workers self-playing to feed the replay buffer
@@ -46,12 +49,10 @@ class MuZeroConfig:
         self.pb_c_base = 19652
         self.pb_c_init = 1.25
 
-
-
         ### Network
         self.network = "resnet"  # "resnet" / "fullyconnected"
         self.support_size = 10  # Value and reward are scaled (with almost sqrt) and encoded on a vector with a range of -support_size to support_size. Choose it so that support_size <= sqrt(max(abs(discounted reward)))
-        
+
         # Residual Network
         self.downsample = False  # Downsample observations before representation network, False / "CNN" (lighter) / "resnet" (See paper appendix Network Architecture)
         self.blocks = 6  # Number of blocks in the ResNet
@@ -62,7 +63,7 @@ class MuZeroConfig:
         self.resnet_fc_reward_layers = [64]  # Define the hidden layers in the reward head of the dynamic network
         self.resnet_fc_value_layers = [64]  # Define the hidden layers in the value head of the prediction network
         self.resnet_fc_policy_layers = [64]  # Define the hidden layers in the policy head of the prediction network
-        
+
         # Fully Connected Network
         self.encoding_size = 32
         self.fc_representation_layers = []  # Define the hidden layers in the representation network
@@ -71,10 +72,10 @@ class MuZeroConfig:
         self.fc_value_layers = []  # Define the hidden layers in the value network
         self.fc_policy_layers = []  # Define the hidden layers in the policy network
 
-
-
         ### Training
-        self.results_path = pathlib.Path(__file__).resolve().parents[1] / "results" / pathlib.Path(__file__).stem / datetime.datetime.now().strftime("%Y-%m-%d--%H-%M-%S")  # Path to store the model weights and TensorBoard logs
+        self.results_path = pathlib.Path(__file__).resolve().parents[1] / "results" / pathlib.Path(
+            __file__).stem / datetime.datetime.now().strftime(
+            "%Y-%m-%d--%H-%M-%S")  # Path to store the model weights and TensorBoard logs
         self.save_model = True  # Save the checkpoint in results_path as model.checkpoint
         self.training_steps = 10000  # Total number of training steps (ie weights update according to a batch)
         self.batch_size = 512  # Number of parts of games to train on at each training step
@@ -91,8 +92,6 @@ class MuZeroConfig:
         self.lr_decay_rate = 0.9  # Set it to 1 to use a constant learning rate
         self.lr_decay_steps = 10000
 
-
-
         ### Replay Buffer
         self.replay_buffer_size = 10000  # Number of self-play games to keep in the replay buffer
         self.num_unroll_steps = 121  # Number of game moves to keep for every batch element
@@ -103,8 +102,6 @@ class MuZeroConfig:
         # Reanalyze (See paper appendix Reanalyse)
         self.use_last_model_value = False  # Use the last model to provide a fresher, stable n-step value (See paper appendix Reanalyze)
         self.reanalyse_on_gpu = False
-
-
 
         ### Adjust the self play / training ratio to avoid over/underfitting
         self.self_play_delay = 0  # Number of seconds to wait after each played game
@@ -278,7 +275,7 @@ class Gomoku:
                     count = 0
                     for _ in range(5):
                         if (x not in range(self.board_size)) or (
-                            y not in range(self.board_size)
+                                y not in range(self.board_size)
                         ):
                             break
                         if self.board[x][y] != player:
@@ -311,9 +308,9 @@ class Gomoku:
     def human_input_to_action(self):
         human_input = input("Enter an action: ")
         if (
-            len(human_input) == 2
-            and human_input[0] in self.board_markers
-            and human_input[1] in self.board_markers
+                len(human_input) == 2
+                and human_input[0] in self.board_markers
+                and human_input[1] in self.board_markers
         ):
             x = ord(human_input[0]) - 65
             y = ord(human_input[1]) - 65
@@ -327,3 +324,95 @@ class Gomoku:
         x = chr(x + 65)
         y = chr(y + 65)
         return x + y
+
+
+class gomoku_gui:
+    def __init__(self, root):
+        self.root = root
+        self.name = "gomoku"
+        self.play = False
+        self.states = []
+        for i in range(11):
+            row = []
+            for j in range(11):
+                row.append(Empty(0, ""))
+            self.states.append(row)
+
+        self.ai = AI(self, MuZeroConfig(), 666)
+        self.game_history = GameHistory()
+        self.game_history.action_history.append(0)
+        self.game_history.observation_history.append(numpy.zeros([11, 11]))
+        self.game_history.reward_history.append(0)
+        self.game_history.to_play_history.append(0)
+
+    def train(self):
+        MuZero("gomoku").train()
+
+    def test(self):
+        self.root.clear_all()
+        self.states = []
+
+        for i in range(11):
+            row = []
+            for j in range(11):
+                row.append(Empty(0, ""))
+            self.states.append(row)
+
+        self.canvas = GUI(self.root, self.states)
+
+        self.root.games_frame.unbind_all("<Button>")
+        self.root.bind_all("<Button>", self.button_press)
+        self.root.bind_all("<Key>", self.key_press)
+
+        self.testing = True
+        while self.testing:
+            self.canvas.render(self.states)
+            if not self.play:
+                action, root = self.ai.get_action(self.game_history)
+                self.new_piece(action // 11, action % 11, 'white')
+                self.ai.update_history(action, root, self.game_history,
+                                       1 if self.judge_all(action // 11, action % 11) else 0, 1)
+                self.play = True
+
+        self.root.clear_all()
+        self.root.setObjects()
+
+    def button_press(self, e):
+        x = int(11 * e.x / self.canvas.width / self.canvas.unit)
+        y = int(11 * e.y / self.canvas.height / self.canvas.unit)
+        if self.play and type(self.states[x][y]) is Empty:
+            self.new_piece(x, y, 'black')
+            action, root = self.ai.get_action(self.game_history)
+            self.ai.update_history((x - 1) * 11 + y - 1, root, self.game_history, 1 if self.judge_all(x, y) else 0, 0)
+            self.play = False
+
+    def new_piece(self, x, y, color):
+        self.states[x][y] = Piece(10, color)
+        if self.judge_all(x, y):
+            print(color, "win.")
+
+    def judge_all(self, x0, y0):
+        for (i, j) in ((1, 0), (0, 1), (1, -1), (1, 1)):
+            if self.judge(x0, y0, i, j):
+                return True
+
+        return False
+
+    def judge(self, x0, y0, dx, dy):
+        total = 0
+        for i in range(1, 5):
+            if x0 + dx * i > 10 or y0 + dy * i > 10 or x0 + dx * i < 0 or y0 + dy * i < 0 or \
+                    self.states[x0 + dx * i][y0 + dy * i].color != self.states[x0][y0].color:
+                break
+            total += 1
+        for i in range(1, 5 - total):
+            if x0 - dx * i > 10 or y0 - dy * i > 10 or x0 - dx * i < 0 or y0 - dy * i < 0 or \
+                    self.states[x0 - dx * i][y0 - dy * i].color != self.states[x0][y0].color:
+                break
+            total += 1
+
+        return total > 3
+
+    def key_press(self, e):
+        if e.keysym == "Escape":
+            self.testing = False

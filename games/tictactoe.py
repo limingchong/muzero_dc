@@ -10,7 +10,7 @@ from games.tictactoe_dic.Empty import Empty
 from games.tictactoe_dic.Piece import Piece
 from tkinter import *
 from games.tictactoe_dic.GUI import GUI
-
+from Launcher import MuZero
 
 class MuZeroConfig:
     def __init__(self):
@@ -354,7 +354,7 @@ class TicTacToe:
 class tictactoe_gui:
     def __init__(self, root):
         self.root = root
-        self.name = "gomoku"
+        self.name = "tictactoe"
         self.play = False
         self.states = []
         for i in range(3):
@@ -362,14 +362,19 @@ class tictactoe_gui:
             for j in range(3):
                 row.append(Empty(0, ""))
             self.states.append(row)
+
+    def train(self):
+        MuZero("tictactoe").train()
+
+    def test(self):
         self.ai = AI(self, MuZeroConfig(), 666)
         self.game_history = GameHistory()
         self.game_history.action_history.append(0)
         self.game_history.observation_history.append(numpy.zeros([3, 3]))
         self.game_history.reward_history.append(0)
         self.game_history.to_play_history.append(0)
+        self.ai.load_model("results/tictactoe/model.checkpoint", "results/tictactoe/replay_buffer.pkl")
 
-    def test(self):
         self.root.clear_all()
         self.canvas = GUI(self.root)
         self.root.games_frame.unbind_all("<Button>")

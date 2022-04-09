@@ -3,8 +3,11 @@ import pathlib
 
 import numpy
 import torch
-
-from .abstract_game import AbstractGame
+from games.connect4_dic.Piece import Piece
+from games.connect4_dic.GUI import GUI
+from games.connect4_dic.Empty import Empty
+from AI import *
+from games.abstract_game import AbstractGame
 
 
 class MuZeroConfig:
@@ -15,10 +18,9 @@ class MuZeroConfig:
         self.seed = 0  # Seed for numpy, torch and the game
         self.max_num_gpus = None  # Fix the maximum number of GPUs to use. It's usually faster to use a single GPU (set it to 1) if it has enough memory. None will use every GPUs available
 
-
-
         ### Game
-        self.observation_shape = (3, 6, 7)  # Dimensions of the game observation, must be 3D (channel, height, width). For a 1D array, please reshape it to (1, 1, length of array)
+        self.observation_shape = (3, 6,
+                                  7)  # Dimensions of the game observation, must be 3D (channel, height, width). For a 1D array, please reshape it to (1, 1, length of array)
         self.action_space = list(range(7))  # Fixed list of all possible actions. You should only edit the length
         self.players = list(range(2))  # List of players. You should only edit the length
         self.stacked_observations = 0  # Number of previous observations and previous actions to add to the current observation
@@ -26,8 +28,6 @@ class MuZeroConfig:
         # Evaluate
         self.muzero_player = 0  # Turn Muzero begins to play (0: MuZero plays first, 1: MuZero plays second)
         self.opponent = "expert"  # Hard coded agent that MuZero faces to assess his progress in multiplayer games. It doesn't influence training. None, "random" or "expert" if implemented in the Game class
-
-
 
         ### Self-Play
         self.num_workers = 1  # Number of simultaneous threads/workers self-playing to feed the replay buffer
@@ -45,12 +45,10 @@ class MuZeroConfig:
         self.pb_c_base = 19652
         self.pb_c_init = 1.25
 
-
-
         ### Network
         self.network = "resnet"  # "resnet" / "fullyconnected"
         self.support_size = 10  # Value and reward are scaled (with almost sqrt) and encoded on a vector with a range of -support_size to support_size. Choose it so that support_size <= sqrt(max(abs(discounted reward)))
-        
+
         # Residual Network
         self.downsample = False  # Downsample observations before representation network, False / "CNN" (lighter) / "resnet" (See paper appendix Network Architecture)
         self.blocks = 3  # Number of blocks in the ResNet
@@ -61,7 +59,7 @@ class MuZeroConfig:
         self.resnet_fc_reward_layers = [64]  # Define the hidden layers in the reward head of the dynamic network
         self.resnet_fc_value_layers = [64]  # Define the hidden layers in the value head of the prediction network
         self.resnet_fc_policy_layers = [64]  # Define the hidden layers in the policy head of the prediction network
-        
+
         # Fully Connected Network
         self.encoding_size = 32
         self.fc_representation_layers = []  # Define the hidden layers in the representation network
@@ -70,10 +68,10 @@ class MuZeroConfig:
         self.fc_value_layers = []  # Define the hidden layers in the value network
         self.fc_policy_layers = []  # Define the hidden layers in the policy network
 
-
-
         ### Training
-        self.results_path = pathlib.Path(__file__).resolve().parents[1] / "results" / pathlib.Path(__file__).stem / datetime.datetime.now().strftime("%Y-%m-%d--%H-%M-%S")  # Path to store the model weights and TensorBoard logs
+        self.results_path = pathlib.Path(__file__).resolve().parents[1] / "results" / pathlib.Path(
+            __file__).stem / datetime.datetime.now().strftime(
+            "%Y-%m-%d--%H-%M-%S")  # Path to store the model weights and TensorBoard logs
         self.save_model = True  # Save the checkpoint in results_path as model.checkpoint
         self.training_steps = 100000  # Total number of training steps (ie weights update according to a batch)
         self.batch_size = 64  # Number of parts of games to train on at each training step
@@ -90,8 +88,6 @@ class MuZeroConfig:
         self.lr_decay_rate = 1  # Set it to 1 to use a constant learning rate
         self.lr_decay_steps = 10000
 
-
-
         ### Replay Buffer
         self.replay_buffer_size = 10000  # Number of self-play games to keep in the replay buffer
         self.num_unroll_steps = 42  # Number of game moves to keep for every batch element
@@ -102,8 +98,6 @@ class MuZeroConfig:
         # Reanalyze (See paper appendix Reanalyse)
         self.use_last_model_value = True  # Use the last model to provide a fresher, stable n-step value (See paper appendix Reanalyze)
         self.reanalyse_on_gpu = False
-
-
 
         ### Adjust the self play / training ratio to avoid over/underfitting
         self.self_play_delay = 0  # Number of seconds to wait after each played game
@@ -262,10 +256,10 @@ class Connect4:
         for i in range(4):
             for j in range(6):
                 if (
-                    self.board[j][i] == self.player
-                    and self.board[j][i + 1] == self.player
-                    and self.board[j][i + 2] == self.player
-                    and self.board[j][i + 3] == self.player
+                        self.board[j][i] == self.player
+                        and self.board[j][i + 1] == self.player
+                        and self.board[j][i + 2] == self.player
+                        and self.board[j][i + 3] == self.player
                 ):
                     return True
 
@@ -273,10 +267,10 @@ class Connect4:
         for i in range(7):
             for j in range(3):
                 if (
-                    self.board[j][i] == self.player
-                    and self.board[j + 1][i] == self.player
-                    and self.board[j + 2][i] == self.player
-                    and self.board[j + 3][i] == self.player
+                        self.board[j][i] == self.player
+                        and self.board[j + 1][i] == self.player
+                        and self.board[j + 2][i] == self.player
+                        and self.board[j + 3][i] == self.player
                 ):
                     return True
 
@@ -284,10 +278,10 @@ class Connect4:
         for i in range(4):
             for j in range(3):
                 if (
-                    self.board[j][i] == self.player
-                    and self.board[j + 1][i + 1] == self.player
-                    and self.board[j + 2][i + 2] == self.player
-                    and self.board[j + 3][i + 3] == self.player
+                        self.board[j][i] == self.player
+                        and self.board[j + 1][i + 1] == self.player
+                        and self.board[j + 2][i + 2] == self.player
+                        and self.board[j + 3][i + 3] == self.player
                 ):
                     return True
 
@@ -295,10 +289,10 @@ class Connect4:
         for i in range(4):
             for j in range(3, 6):
                 if (
-                    self.board[j][i] == self.player
-                    and self.board[j - 1][i + 1] == self.player
-                    and self.board[j - 2][i + 2] == self.player
-                    and self.board[j - 3][i + 3] == self.player
+                        self.board[j][i] == self.player
+                        and self.board[j - 1][i + 1] == self.player
+                        and self.board[j - 2][i + 2] == self.player
+                        and self.board[j - 3][i + 3] == self.player
                 ):
                     return True
 
@@ -309,7 +303,7 @@ class Connect4:
         action = numpy.random.choice(self.legal_actions())
         for k in range(3):
             for l in range(4):
-                sub_board = board[k : k + 4, l : l + 4]
+                sub_board = board[k: k + 4, l: l + 4]
                 # Horizontal and vertical checks
                 for i in range(4):
                     if abs(sum(sub_board[i, :])) == 3:
@@ -344,3 +338,100 @@ class Connect4:
 
     def render(self):
         print(self.board[::-1])
+
+
+class connect4_gui:
+    def __init__(self, root):
+        self.root = root
+        self.name = "connect4"
+        self.play = False
+        self.states = []
+        for i in range(6):
+            row = []
+            for j in range(7):
+                row.append(Empty(0, ""))
+            self.states.append(row)
+
+        self.ai = AI(self, MuZeroConfig(), 666)
+        self.game_history = GameHistory()
+        self.game_history.action_history.append(0)
+        self.game_history.observation_history.append(numpy.zeros([6, 7]))
+        self.game_history.reward_history.append(0)
+        self.game_history.to_play_history.append(0)
+
+    def train(self):
+        pass
+
+    def test(self):
+        self.states = []
+
+        for i in range(6):
+            row = []
+            for j in range(7):
+                row.append(Empty(0, ""))
+            self.states.append(row)
+
+        self.canvas = GUI(self.root)
+
+        self.root.games_frame.unbind_all("<Button>")
+        self.root.bind_all("<Button>", self.button_press)
+        self.root.bind_all("<Key>", self.key_press)
+
+        self.testing = True
+        while self.testing:
+            self.canvas.render(self.states)
+            if not self.play:
+                #action, root = self.ai.get_action(self.game_history)
+                action = 2
+                for x in range(6):
+                    if type(self.states[x][action]) == Empty:
+                        self.new_piece(x, action, 'red')
+                        #self.ai.update_history(action, root, self.game_history,
+                        #                       1 if self.judge_all(x, action) else 0, 1)
+                        break
+                self.play = True
+
+        self.root.clear_all()
+        self.root.setObjects()
+
+    def button_press(self, e):
+        y = int(6 * e.y / self.canvas.height / self.canvas.unit)
+        for x in range(6):
+            if type(self.states[x][y]) == Empty and self.play:
+                self.new_piece(x, y, 'yellow')
+                #action, root = self.ai.get_action(self.game_history)
+                #self.ai.update_history(y, root, self.game_history, 1 if self.judge_all(x, y) else 0, 0)
+                self.play = False
+                break
+
+
+    def new_piece(self, x, y, color):
+        self.states[x][y] = Piece(10, color)
+        if self.judge_all(x, y):
+            print(color, "win.")
+
+    def judge_all(self, x0, y0):
+        for (i, j) in ((1, 0), (0, 1), (1, -1), (1, 1)):
+            if self.judge(x0, y0, i, j):
+                return True
+
+        return False
+
+    def judge(self, x0, y0, dx, dy):
+        total = 0
+        for i in range(1, 4):
+            if x0 + dx * i > 5 or y0 + dy * i > 6 or x0 + dx * i < 0 or y0 + dy * i < 0 or \
+                    self.states[x0 + dx * i][y0 + dy * i].color != self.states[x0][y0].color:
+                break
+            total += 1
+        for i in range(1, 4 - total):
+            if x0 - dx * i > 5 or y0 - dy * i > 6 or x0 - dx * i < 0 or y0 - dy * i < 0 or \
+                    self.states[x0 - dx * i][y0 - dy * i].color != self.states[x0][y0].color:
+                break
+            total += 1
+
+        return total > 2
+
+    def key_press(self, e):
+        if e.keysym == "Escape":
+            self.testing = False

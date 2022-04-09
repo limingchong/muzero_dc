@@ -1,26 +1,22 @@
-import tkinter
-
-from tkinter import *
-
-from games.gomoku_gui import gomoku_gui
-from games.pong import pong
-from games.tank_battle import tank_battle
-from games.twentyone import twentyone
-from games.tictactoe import *
-
 '''
     Author: Mingchong Li
     Date: 2022/3/27
 '''
 
+import tkinter
+
+from games.connect4 import connect4_gui
+from games.gomoku_gui import gomoku_gui
+from games.pong import pong
+from games.tank_battle import tank_battle
+from games.tictactoe import *
+from games.twentyone import twentyone
 
 import copy
 import importlib
-import json
 import math
 import pathlib
 import pickle
-import sys
 import time
 
 import nevergrad
@@ -35,6 +31,8 @@ import replay_buffer
 import self_play
 import shared_storage
 import trainer
+
+import matplotlib as plt
 
 
 class MuZero:
@@ -280,6 +278,10 @@ class MuZero:
             "num_reanalysed_games",
         ]
         info = ray.get(self.shared_storage_worker.get_info.remote(keys))
+        con = []
+        muzero_reward= []
+        num_played_steps = []
+        reward_loss = []
         try:
             while info["training_step"] < self.config.training_steps:
                 info = ray.get(self.shared_storage_worker.get_info.remote(keys))
@@ -340,6 +342,23 @@ class MuZero:
                     f'Last test reward: {info["total_reward"]:.2f}. Training step: {info["training_step"]}/{self.config.training_steps}. Played games: {info["num_played_games"]}. Loss: {info["total_loss"]:.2f}',
                     end="\r",
                 )
+                con.append(counter)
+                muzero_reward.append((info["muzero_reward"]))
+                num_played_steps.append(info["num_played_steps"])
+                reward_loss.append(info["reward_loss"])
+                plt.subplot(221)
+                plt.plot(con, muzero_reward, color='green', label="muzero_reward")
+                plt.ylabel("muzero_reward")
+
+                plt.subplot(222)
+                plt.plot(con, num_played_steps, color='green', label="num_played_steps")
+                plt.ylabel("num_played_steps")
+
+                plt.subplot(223)
+                plt.plot(con, reward_loss, color='green', label="reward_loss")
+                plt.ylabel("reward_loss")
+
+                plt.pause(0.1)
                 counter += 1
                 time.sleep(0.5)
         except KeyboardInterrupt:
@@ -718,8 +737,8 @@ class window(Tk):
     def click(self, e):
         print("e:", e, "widget:", e.widget, "root:", [e.x_root, e.y_root])
 
-        if str(e.widget)[-7: len(str(e.widget))] == "button":
-            pass
+        if str(e.widget)[-6: len(str(e.widget))] == "button":
+            self.game = connect4_gui(self)
         elif str(e.widget)[-7: len(str(e.widget))] == "button2":
             self.game = gomoku_gui(self)
         elif str(e.widget)[-7: len(str(e.widget))] == "button3":
@@ -754,7 +773,9 @@ class window(Tk):
             self.game = None
 
         if e.num == 3:
+            print("3")
             self.rightList.place(x=e.x_root - self.winfo_x() - 10, y=e.y_root - self.winfo_y() - 25)
+        print("out")
 
 
 if __name__ == "__main__":

@@ -57,7 +57,6 @@ class AI:
         self.model.to(torch.device("cuda" if self.config.selfplay_on_gpu else "cpu"))
         self.model.eval()
         self.game = game
-        self.load_model()
 
     def load_model(self, checkpoint_path=None, replay_buffer_path=None):
         """
@@ -68,8 +67,6 @@ class AI:
 
             replay_buffer_path (str): Path to replay_buffer.pkl
         """
-        checkpoint_path = "results\\tictactoe\\2022-04-09--09-47-00\\model.checkpoint"
-        replay_buffer_path = "results\\tictactoe\\2022-04-09--09-47-00\\replay_buffer.pkl"
 
         # Load checkpoint
         if checkpoint_path:
