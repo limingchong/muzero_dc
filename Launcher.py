@@ -282,6 +282,7 @@ class MuZero:
         muzero_reward= []
         num_played_steps = []
         reward_loss = []
+        Training_steps_per_self_played_step_ratio = []
         try:
             while info["training_step"] < self.config.training_steps:
                 info = ray.get(self.shared_storage_worker.get_info.remote(keys))
@@ -346,6 +347,7 @@ class MuZero:
                 muzero_reward.append((info["muzero_reward"]))
                 num_played_steps.append(info["num_played_steps"])
                 reward_loss.append(info["reward_loss"])
+                Training_steps_per_self_played_step_ratio.append(info["training_step"] / max(1, info["num_played_steps"]))
                 plt.subplot(221)
                 plt.plot(con, muzero_reward, color='green', label="muzero_reward")
                 plt.ylabel("muzero_reward")
@@ -357,6 +359,10 @@ class MuZero:
                 plt.subplot(223)
                 plt.plot(con, reward_loss, color='green', label="reward_loss")
                 plt.ylabel("reward_loss")
+
+                plt.subplot(224)
+                plt.plot(con, Training_steps_per_self_played_step_ratio, color='green', label="reward_loss")
+                plt.ylabel("Training_steps_per_self_played_step_ratio")
 
                 plt.pause(0.1)
                 counter += 1
