@@ -5,6 +5,8 @@
 
 import tkinter
 
+from matplotlib import pyplot as plt
+
 from games.connect4 import connect4_gui
 from games.gomoku_gui import gomoku_gui
 from games.pong import pong
@@ -31,8 +33,6 @@ import replay_buffer
 import self_play
 import shared_storage
 import trainer
-
-import matplotlib as plt
 
 
 class MuZero:
@@ -720,7 +720,7 @@ class window(Tk):
         self.tic_tac_toe.grid(row=2, column=1)
         self.twenty_one.grid(row=2, column=2)
 
-        self.games_frame.pack(padx=10, pady=10)
+        self.games_frame.pack(padx=30, pady=30)
 
         options = ["训练", "测试", "修改", "详情"]
         self.rightList = Listbox(self, font="黑体 16", height=4, width=4, borderwidth=0, bg="green")
