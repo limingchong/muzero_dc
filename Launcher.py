@@ -778,9 +778,11 @@ class window(Tk):
                     self.game.test()
 
                 if self.rightList.curselection()[0] == 2:
-                    print("modify", self.game.name)
+                    self.game.option(image_tic_tac_toe)
+
                 if self.rightList.curselection()[0] == 3:
-                    print("detail", self.game.name)
+                    self.game.detail(image_tic_tac_toe)
+
             else:
                 self.clear_all()
                 self.game.test()

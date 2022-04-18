@@ -1,9 +1,6 @@
 import datetime
-import pathlib
-import threading
-
-import numpy
-import torch
+from matplotlib import pyplot
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from AI import *
 from games.abstract_game import AbstractGame
 from games.tictactoe_dic.Empty import Empty
@@ -11,6 +8,7 @@ from games.tictactoe_dic.Piece import Piece
 from tkinter import *
 from games.tictactoe_dic.GUI import GUI
 from Launcher import MuZero
+
 
 class MuZeroConfig:
     def __init__(self):
@@ -366,8 +364,112 @@ class tictactoe_gui:
     def train(self):
         MuZero("tictactoe").train()
 
-    def detail(self):
-        pass
+    def option(self, img):
+        self.root.clear_all()
+
+        Label(self.root, text="Tic Tac Toe", font=("Times New Roman", "25"), bg="#FFFFFF").place(x=40, y=20)
+
+        Canvas(self.root, bg="#D8D8D8", height=5, width=700).place(x=30, y=70)
+
+        Canvas(self.root, bg="#D8D8D8", height=470, width=123).place(x=30, y=100)
+
+        Canvas(self.root, bg="#D8D8D8", height=470, width=552).place(x=180, y=100)
+
+        Label(self.root,
+              text="游戏名",
+              font=("microsoft yahei", "12"),
+              wraplength=450,
+              bg="#D8D8D8",
+              justify="left").place(x=200, y=120)
+
+        v_1 = StringVar()
+        v_1.set(MuZeroConfig().network)
+
+        Entry(self.root,
+              textvariable=v_1,
+              width=15,
+              borderwidth=0).place(x=270, y=125)
+
+        Label(self.root, image=img, width=100, height=100, bd=2, relief="solid").place(x=40, y=110)
+
+    def detail(self, img):
+        self.root.clear_all()
+
+        Label(self.root, text="Tic Tac Toe", font=("Times New Roman", "25"), bg="#FFFFFF").place(x=40, y=20)
+
+        Canvas(self.root, bg="#D8D8D8", height=5, width=700).place(x=30, y=70)
+
+        Canvas(self.root, bg="#D8D8D8", height=470, width=700).place(x=30, y=100)
+
+        Label(self.root, image=img, width=200, height=200, bd=2, relief="solid").place(x=50, y=120)
+
+        Label(self.root,
+              text="简介",
+              font=("microsoft yahei", "15", "bold"), wraplength=450, bg="#D8D8D8", justify="left").place(x=265, y=113)
+
+        Label(self.root,
+              text="是黑白棋的一种。三子棋是一种民间传统游戏，又叫九宫棋、圈圈叉叉、一条龙、井字棋等。将正方形对角线连起来，相对两边依次摆上"
+                   "三个双方棋子。",
+              font=("microsoft yahei", "12"), wraplength=450, bg="#D8D8D8", justify="left").place(x=265, y=140)
+
+        Label(self.root,
+              text="规则",
+              font=("microsoft yahei", "15", "bold"), wraplength=450, bg="#D8D8D8", justify="left").place(x=265, y=210)
+
+        Label(self.root,
+              text="只要将自己的三个棋子走成一条线，对方就算输了。如果两个人都掌握了技巧，那么一般来说就是平棋。一般来说，第二步下在中间最有"
+                   "利（因为第一步不能够下在中间），下在角上次之，下在边上再次之。",
+              font=("microsoft yahei", "12"), wraplength=450, bg="#D8D8D8", justify="left").place(x=265, y=237)
+
+        checkpoint_path = "results/tictactoe/model.checkpoint"
+        checkpoint_path = pathlib.Path(checkpoint_path)
+        checkpoint = torch.load(checkpoint_path)
+
+        replay_buffer_path = "results/tictactoe/replay_buffer.pkl"
+
+        replay_buffer_path = pathlib.Path(replay_buffer_path)
+        with open(replay_buffer_path, "rb") as f:
+            replay_buffer_infos = pickle.load(f)
+            replay_buffer = replay_buffer_infos["buffer"]
+
+        # game_priority
+        x = []
+        y = []
+
+        total_win = 0
+        horizontal_line = []
+        for i in range(checkpoint["num_played_games"]):
+            x.append(i)
+            steps = len(replay_buffer[i].reward_history)
+            win = 1 if replay_buffer[i].to_play_history[steps - 1] == 1 else -1
+            total_win += win
+            y.append(total_win / (i + 1))
+            horizontal_line.append(0.5)
+
+        string = "训练局数：" + str(checkpoint["num_played_games"]) + "\n" \
+                                                                 "平均步数：" + str(
+            checkpoint["num_played_steps"] / checkpoint["num_played_games"]) + "\n" \
+                                                                "平均损失：" + str(checkpoint["reward_loss"])
+
+        Label(self.root, text=string, font=("microsoft yahei", "12", "bold"), wraplength=450, bg="#D8D8D8",
+              justify="left").place(x=40, y=350)
+        Button(self.root, text="重新训练", bg="#D8D8D8", borderwidth=2, fg="black",
+               font=("microsoft yahei", "12", "bold")).place(x=40, y=450)
+        Button(self.root, text="关于我们", bg="#D8D8D8", borderwidth=2, fg="black",
+               font=("microsoft yahei", "12", "bold")).place(x=40, y=500)
+
+        f = pyplot.figure()
+
+        pyplot.plot(x, y, ls='-', lw=1, label='win rate', color='purple')
+        pyplot.plot(x, horizontal_line, ls='-', lw=2, label='50%', color='red')
+        pyplot.legend()
+        pyplot.xlabel("epoch")
+        pyplot.ylabel("rate")
+
+        plot_show = FigureCanvasTkAgg(f, self.root)
+        plot_show.get_tk_widget().pack(side=BOTTOM, expand=True)
+        plot_show.get_tk_widget().place(x=400, y=350)
+        plot_show.get_tk_widget().config(width=300, height=200)
 
     def options(self):
         self.root.clear_all()
