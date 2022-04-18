@@ -366,6 +366,17 @@ class tictactoe_gui:
     def train(self):
         MuZero("tictactoe").train()
 
+    def detail(self):
+        pass
+
+    def options(self):
+        self.root.clear_all()
+        self.root.unbind_all("<Button>")
+        self.root.bind_all("<Button>", self.button_press)
+
+        Canvas(self.root, bg="#D8D8D8", height=600, width=670).place(x=30, y=70)
+
+
     def test(self):
         self.ai = AI(self, MuZeroConfig(), 666)
         self.game_history = GameHistory()
@@ -377,7 +388,7 @@ class tictactoe_gui:
 
         self.root.clear_all()
         self.canvas = GUI(self.root)
-        self.root.games_frame.unbind_all("<Button>")
+        self.root.unbind_all("<Button>")
         self.root.bind_all("<Button>", self.button_press)
         self.root.bind_all("<Key>", self.key_press)
 

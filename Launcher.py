@@ -3,28 +3,19 @@
     Date: 2022/3/27
 '''
 
-import tkinter
-
-from matplotlib import pyplot as plt
-
-from games.connect4 import connect4_gui
-from games.gomoku_gui import gomoku_gui
-from games.pong import pong
-from games.tank_battle import tank_battle
-from games.tictactoe import *
-from games.twentyone import twentyone
-
 import copy
 import importlib
 import math
 import pathlib
 import pickle
 import time
+import tkinter
 
 import nevergrad
 import numpy
 import ray
 import torch
+from matplotlib import pyplot as plt
 from torch.utils.tensorboard import SummaryWriter
 
 import diagnose_model
@@ -33,6 +24,12 @@ import replay_buffer
 import self_play
 import shared_storage
 import trainer
+from games.connect4 import connect4_gui
+from games.gomoku_gui import gomoku_gui
+from games.pong import pong
+from games.tank_battle import tank_battle
+from games.tictactoe import *
+from games.twentyone import twentyone
 
 
 class MuZero:
@@ -282,7 +279,6 @@ class MuZero:
         muzero_reward= []
         num_played_steps = []
         reward_loss = []
-        Training_steps_per_self_played_step_ratio = []
         try:
             while info["training_step"] < self.config.training_steps:
                 info = ray.get(self.shared_storage_worker.get_info.remote(keys))
@@ -347,7 +343,6 @@ class MuZero:
                 muzero_reward.append((info["muzero_reward"]))
                 num_played_steps.append(info["num_played_steps"])
                 reward_loss.append(info["reward_loss"])
-                Training_steps_per_self_played_step_ratio.append(info["training_step"] / max(1, info["num_played_steps"]))
                 plt.subplot(221)
                 plt.plot(con, muzero_reward, color='green', label="muzero_reward")
                 plt.ylabel("muzero_reward")
@@ -359,10 +354,6 @@ class MuZero:
                 plt.subplot(223)
                 plt.plot(con, reward_loss, color='green', label="reward_loss")
                 plt.ylabel("reward_loss")
-
-                plt.subplot(224)
-                plt.plot(con, Training_steps_per_self_played_step_ratio, color='green', label="reward_loss")
-                plt.ylabel("Training_steps_per_self_played_step_ratio")
 
                 plt.pause(0.1)
                 counter += 1
@@ -663,8 +654,8 @@ def load_model_menu(muzero, game_name):
 
 # parameters
 
-WINDOW_WIDTH = 960
-WINDOW_HEIGHT = 540
+WINDOW_WIDTH = 760
+WINDOW_HEIGHT = 600
 
 
 class window(Tk):
@@ -672,7 +663,6 @@ class window(Tk):
 
     def __init__(self):
         Tk.__init__(self)
-        self.games_frame = None
         self.game = None
         self.setObjects()
         self.mainloop()
@@ -683,10 +673,11 @@ class window(Tk):
                                            int(self.winfo_screenwidth() / 2 - WINDOW_WIDTH / 2),
                                            int(self.winfo_screenheight() / 2 - WINDOW_HEIGHT / 2)))
         self.title("基于强化学习的攻防系统")
+        self.config(bg="#FFFFFF")
 
-        self.games_frame = Frame(self)
+        self.window_title = Label(self, text="基于强化学习的攻防系统", font="黑体 25", bg="#FFFFFF")
 
-        self.window_title = Label(self.games_frame, text="基于强化学习的攻防系统", font="黑体 25")
+        self.separate_line = Label(self, width=100, height=1, bg="white")
 
         global image_connect4
         global image_gomoku
@@ -709,27 +700,45 @@ class window(Tk):
         image_tic_tac_toe = image_tic_tac_toe.subsample(int(image_tic_tac_toe.width() / 200))
         image_twenty_one = image_twenty_one.subsample(int(image_twenty_one.width() / 200))
 
-        self.connect4 = Button(self.games_frame, image=image_connect4, width=200, height=200)
-        self.gomoku = Button(self.games_frame, image=image_gomoku, width=200, height=200)
-        self.pong = Button(self.games_frame, image=image_pong, width=200, height=200)
-        self.tank_wars = Button(self.games_frame, image=image_tank_wars, width=200, height=200)
-        self.tic_tac_toe = Button(self.games_frame, image=image_tic_tac_toe, width=200, height=200)
-        self.twenty_one = Button(self.games_frame, image=image_twenty_one, width=200, height=200)
+        self.connect4 = Button(self, image=image_connect4, width=200, height=200,bd=3,relief="solid")
+        self.gomoku = Button(self, image=image_gomoku, width=200, height=200,bd=3,relief="solid")
+        self.pong = Button(self, image=image_pong, width=200, height=200,bd=3,relief="solid")
+        self.tank_wars = Button(self, image=image_tank_wars, width=200, height=200,bd=3,relief="solid")
+        self.tic_tac_toe = Button(self, image=image_tic_tac_toe, width=200, height=200,bd=3,relief="solid")
+        self.twenty_one = Button(self, image=image_twenty_one, width=200, height=200,bd=3,relief="solid")
 
-        self.games_frame.bind_all("<Button>", self.click)
+        self.address_label = Label(self, text="地址：", bg="white")
+        self.address_entry = Entry(self, width=15, bg="#D8D8D8", borderwidth=0, fg="black")
+        self.username_label = Label(self, text="用户名：", bg="white")
+        self.username_entry = Entry(self, width=15, bg="#D8D8D8", borderwidth=0, fg="black")
+        self.password_label = Label(self, text="密码：", bg="white")
+        self.password_entry = Entry(self, width=15, show="*", bg="#D8D8D8", borderwidth=0, fg="black")
 
-        self.window_title.grid(row=0, column=1)
-        self.connect4.grid(row=1, column=0)
-        self.gomoku.grid(row=1, column=1)
-        self.pong.grid(row=1, column=2)
-        self.tank_wars.grid(row=2, column=0)
-        self.tic_tac_toe.grid(row=2, column=1)
-        self.twenty_one.grid(row=2, column=2)
+        self.about_us = Button(self, text="关于我们", bg="#D8D8D8", borderwidth=0, fg="black")
 
-        self.games_frame.pack(padx=30, pady=30)
+        self.bind_all("<Button>", self.click)
+
+        PAD = 10
+
+        self.window_title.grid(     row=0, column=0, pady=PAD, padx=PAD, columnspan=3)
+        self.separate_line.grid(    row=1, column=0, pady=PAD, padx=PAD, columnspan=3)
+        self.connect4.grid(         row=2, column=0, pady=PAD, padx=PAD)
+        self.gomoku.grid(           row=2, column=1, pady=PAD, padx=PAD)
+        self.pong.grid(             row=2, column=2, pady=PAD, padx=PAD)
+        self.tank_wars.grid(        row=3, column=0, pady=PAD, padx=PAD)
+        self.tic_tac_toe.grid(      row=3, column=1, pady=PAD, padx=PAD)
+        self.twenty_one.grid(       row=3, column=2, pady=PAD, padx=PAD)
+        self.address_label.place(   x=20,   y=570)
+        self.address_entry.place(   x=70,   y=570)
+        self.username_label.place(  x=220,  y=570)
+        self.username_entry.place(  x=270,  y=570)
+        self.password_label.place(  x=420,  y=570)
+        self.password_entry.place(  x=470,  y=570)
+        self.about_us.place(        x=655,  y=570)
+        tkinter.Canvas(self, bg="#D8D8D8", height=5, width=670).place(x=30, y=70)
 
         options = ["训练", "测试", "修改", "详情"]
-        self.rightList = Listbox(self, font="黑体 16", height=4, width=4, borderwidth=0, bg="green")
+        self.rightList = Listbox(self, font="黑体 16", height=4, width=7, justify="center", borderwidth=0, bg="#D8D8D8", selectbackground="#5BA0CB")
         for opt in options:
             self.rightList.insert(END, opt)
 

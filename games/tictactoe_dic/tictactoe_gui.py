@@ -23,6 +23,9 @@ class tictactoe_gui:
     def train(self):
         pass
 
+    def detail(self):
+        pass
+
     def test(self):
         self.root.clear_all()
         self.states = []
@@ -36,7 +39,7 @@ class tictactoe_gui:
 
         self.canvas = GUI.GUI(self.root, self.states)
 
-        self.root.games_frame.unbind_all("<Button>")
+        self.root.unbind_all("<Button>")
         self.root.bind_all("<Button>", self.button_press)
         self.root.bind_all("<Key>", self.key_press)
 
