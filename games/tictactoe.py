@@ -471,14 +471,6 @@ class tictactoe_gui:
         plot_show.get_tk_widget().place(x=400, y=350)
         plot_show.get_tk_widget().config(width=300, height=200)
 
-    def options(self):
-        self.root.clear_all()
-        self.root.unbind_all("<Button>")
-        self.root.bind_all("<Button>", self.button_press)
-
-        Canvas(self.root, bg="#D8D8D8", height=600, width=670).place(x=30, y=70)
-
-
     def test(self):
         self.ai = AI(self, MuZeroConfig(), 666)
         self.game_history = GameHistory()
