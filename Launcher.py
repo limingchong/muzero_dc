@@ -276,9 +276,10 @@ class MuZero:
         ]
         info = ray.get(self.shared_storage_worker.get_info.remote(keys))
         con = []
-        muzero_reward= []
+        muzero_reward = []
         num_played_steps = []
         reward_loss = []
+        Training_steps_per_self_played_step_ratio = []
         try:
             while info["training_step"] < self.config.training_steps:
                 info = ray.get(self.shared_storage_worker.get_info.remote(keys))
@@ -343,6 +344,8 @@ class MuZero:
                 muzero_reward.append((info["muzero_reward"]))
                 num_played_steps.append(info["num_played_steps"])
                 reward_loss.append(info["reward_loss"])
+                Training_steps_per_self_played_step_ratio.append(
+                    info["training_step"] / max(1, info["num_played_steps"]))
                 plt.subplot(221)
                 plt.plot(con, muzero_reward, color='green', label="muzero_reward")
                 plt.ylabel("muzero_reward")
@@ -354,6 +357,10 @@ class MuZero:
                 plt.subplot(223)
                 plt.plot(con, reward_loss, color='green', label="reward_loss")
                 plt.ylabel("reward_loss")
+
+                plt.subplot(224)
+                plt.plot(con, Training_steps_per_self_played_step_ratio, color='green', label="reward_loss")
+                plt.ylabel("Training_steps_per_self_played_step_ratio")
 
                 plt.pause(0.1)
                 counter += 1
@@ -707,12 +714,13 @@ class window(Tk):
         self.tic_tac_toe = Button(self, image=image_tic_tac_toe, width=200, height=200,bd=3,relief="solid")
         self.twenty_one = Button(self, image=image_twenty_one, width=200, height=200,bd=3,relief="solid")
 
+        preset_strings = ["127.0.0.1", "Administrator", "123456"]
         self.address_label = Label(self, text="地址：", bg="white")
-        self.address_entry = Entry(self, width=15, bg="#D8D8D8", borderwidth=0, fg="black")
+        self.address_entry = Entry(self, width=15, bg="#D8D8D8", borderwidth=0, fg="black", textvariable=preset_strings[0])
         self.username_label = Label(self, text="用户名：", bg="white")
-        self.username_entry = Entry(self, width=15, bg="#D8D8D8", borderwidth=0, fg="black")
+        self.username_entry = Entry(self, width=15, bg="#D8D8D8", borderwidth=0, fg="black", textvariable=preset_strings[1])
         self.password_label = Label(self, text="密码：", bg="white")
-        self.password_entry = Entry(self, width=15, show="*", bg="#D8D8D8", borderwidth=0, fg="black")
+        self.password_entry = Entry(self, width=15, show="*", bg="#D8D8D8", borderwidth=0, fg="black", textvariable=preset_strings[2])
 
         self.about_us = Button(self, text="关于我们", bg="#D8D8D8", borderwidth=0, fg="black")
 
@@ -745,9 +753,9 @@ class window(Tk):
         self.update()
 
     def clear_all(self):
+        self.unbind_all("<Button>")
         for widget in self.winfo_children():
             widget.destroy()
-        print("end")
 
     def click(self, e):
         print("e:", e, "widget:", e.widget, "root:", [e.x_root, e.y_root])
@@ -790,9 +798,7 @@ class window(Tk):
             self.game = None
 
         if e.num == 3:
-            print("3")
             self.rightList.place(x=e.x_root - self.winfo_x() - 10, y=e.y_root - self.winfo_y() - 25)
-        print("out")
 
 
 if __name__ == "__main__":

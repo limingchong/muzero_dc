@@ -1,6 +1,4 @@
 from tkinter import *
-from games.gomoku_dic.Piece import Piece
-import numpy
 
 
 class GUI:

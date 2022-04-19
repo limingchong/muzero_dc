@@ -1,8 +1,9 @@
 import datetime
 import pathlib
 
-import numpy
-import torch
+from matplotlib import pyplot
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from tkinter import *
 from games.connect4_dic.Piece import Piece
 from games.connect4_dic.GUI import GUI
 from games.connect4_dic.Empty import Empty
@@ -345,24 +346,100 @@ class connect4_gui:
         self.root = root
         self.name = "connect4"
         self.play = False
-        self.states = []
-        for i in range(6):
-            row = []
-            for j in range(7):
-                row.append(Empty(0, ""))
-            self.states.append(row)
+        self.winfor = 4
+        self.board_width = 6
+        self.board_height = 7
 
+    def train(self):
+        pass
+
+    def detail(self, img):
+        self.root.clear_all()
+
+        Label(self.root, text="Connect Four", font=("Times New Roman", "25"), bg="#FFFFFF").place(x=40, y=20)
+
+        Canvas(self.root, bg="#D8D8D8", height=5, width=700).place(x=30, y=70)
+
+        Canvas(self.root, bg="#D8D8D8", height=470, width=700).place(x=30, y=100)
+
+        Label(self.root, image=img, width=200, height=200, bd=2, relief="solid").place(x=50, y=120)
+
+        Label(self.root,
+              text="简介",
+              font=("microsoft yahei", "15", "bold"), wraplength=450, bg="#D8D8D8", justify="left").place(x=265, y=113)
+
+        Label(self.root,
+              text="Connect Four四子棋智力棋盘游戏是一种供两人对弈的棋类游戏。圣诞长假即将到来，可能今年更多人会呆家里而不是出游。"
+                   "即使呆家里也不要忘记玩一些好玩的游戏增添乐趣。",
+              font=("microsoft yahei", "12"), wraplength=450, bg="#D8D8D8", justify="left").place(x=265, y=140)
+
+        Label(self.root,
+              text="规则",
+              font=("microsoft yahei", "15", "bold"), wraplength=450, bg="#D8D8D8", justify="left").place(x=265, y=210)
+
+        Label(self.root,
+              text="在棋盘中，任何一方先令自己四只棋子在横，竖或斜方向联成一条直线，即可获胜。类似我们平时玩的五子棋。（适合六岁以上和大人）",
+              font=("microsoft yahei", "12"), wraplength=450, bg="#D8D8D8", justify="left").place(x=265, y=237)
+
+        checkpoint_path = "results/connect4/model.checkpoint"
+        checkpoint_path = pathlib.Path(checkpoint_path)
+        checkpoint = torch.load(checkpoint_path)
+
+        replay_buffer_path = "results/connect4/replay_buffer.pkl"
+
+        replay_buffer_path = pathlib.Path(replay_buffer_path)
+        with open(replay_buffer_path, "rb") as f:
+            replay_buffer_infos = pickle.load(f)
+            replay_buffer = replay_buffer_infos["buffer"]
+
+        # game_priority
+        x = []
+        y = []
+
+        total_win = 0
+        horizontal_line = []
+        for i in range(checkpoint["num_played_games"] - len(replay_buffer) + 10 , checkpoint["num_played_games"]):
+            x.append(i)
+            steps = len(replay_buffer[i].reward_history)
+            if replay_buffer[i].to_play_history[steps - 1] == 1:
+                total_win += 1
+            y.append(total_win / (i + 1))
+            horizontal_line.append(0.5)
+
+        string = "训练局数：" + str(checkpoint["num_played_games"]) + "\n" \
+                                                                 "平均步数：" + str(
+            checkpoint["num_played_steps"] / checkpoint["num_played_games"]) + "\n" \
+                                                                "平均损失：" + str(checkpoint["reward_loss"])
+
+        Label(self.root, text=string, font=("microsoft yahei", "12", "bold"), wraplength=450, bg="#D8D8D8",
+              justify="left").place(x=40, y=350)
+        Button(self.root, text="重新训练", bg="#D8D8D8", borderwidth=2, fg="black",
+               font=("microsoft yahei", "12", "bold")).place(x=40, y=450)
+        Button(self.root, text="关于我们", bg="#D8D8D8", borderwidth=2, fg="black",
+               font=("microsoft yahei", "12", "bold")).place(x=40, y=500)
+
+        f = pyplot.figure()
+
+        pyplot.plot(x, y, ls='-', lw=1, label='win rate', color='purple')
+        pyplot.plot(x, horizontal_line, ls='-', lw=2, label='50%', color='red')
+        pyplot.legend()
+        pyplot.xlabel("epoch")
+        pyplot.ylabel("rate")
+
+        plot_show = FigureCanvasTkAgg(f, self.root)
+        plot_show.get_tk_widget().pack(side=BOTTOM, expand=True)
+        plot_show.get_tk_widget().place(x=400, y=350)
+        plot_show.get_tk_widget().config(width=300, height=200)
+
+    def test(self):
         self.ai = AI(self, MuZeroConfig(), 666)
         self.game_history = GameHistory()
         self.game_history.action_history.append(0)
         self.game_history.observation_history.append(numpy.zeros([6, 7]))
         self.game_history.reward_history.append(0)
         self.game_history.to_play_history.append(0)
+        self.ai.load_model("results/connect4/model.checkpoint", "results/connect4/replay_buffer.pkl")
 
-    def train(self):
-        pass
-
-    def test(self):
         self.states = []
 
         for i in range(6):
@@ -381,18 +458,43 @@ class connect4_gui:
         while self.testing:
             self.canvas.render(self.states)
             if not self.play:
-                #action, root = self.ai.get_action(self.game_history)
-                action = 2
+                action, root = self.ai.get_action(self.game_history)
                 for x in range(6):
                     if type(self.states[x][action]) == Empty:
                         self.new_piece(x, action, 'red')
-                        #self.ai.update_history(action, root, self.game_history,
-                        #                       1 if self.judge_all(x, action) else 0, 1)
+                        self.ai.update_history(action, root, self.game_history,
+                                               1 if self.judge_all(x, action) else 0, 1)
                         break
                 self.play = True
 
         self.root.clear_all()
         self.root.setObjects()
+
+    def get_observation(self):
+        board_A = numpy.zeros([6, 7])
+        board_B = numpy.zeros([6, 7])
+        board_C = numpy.ones([6, 7])
+
+        if not self.play:
+            board_C = -board_C
+
+        for i in range(6):
+            for j in range(7):
+                if type(self.states[i][j]) == Piece:
+                    if self.states[i][j].color == 'yellow':
+                        board_A[i][j] = 1
+                    else:
+                        board_B[i][j] = 1
+
+        return board_A, board_B, board_C
+
+    def get_legal_actions(self):
+        actions = []
+        for i in range(6):
+            if type(self.states[i][6]) == Empty:
+                actions.append(i)
+
+        return actions
 
     def button_press(self, e):
         y = int(6 * e.y / self.canvas.height / self.canvas.unit)

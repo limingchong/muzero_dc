@@ -352,7 +352,7 @@ class gomoku_gui:
 
         self.canvas = GUI.GUI(self.root, self.states)
 
-        self.root.games_frame.unbind_all("<Button>")
+        self.root.unbind_all("<Button>")
         self.root.bind_all("<Button>", self.button_press)
         self.root.bind_all("<Key>", self.key_press)
 

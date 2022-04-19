@@ -54,7 +54,7 @@ class tank_battle:
             self.states.append(row)
 
         self.canvas = GUI(self.root, self.states, 22, 22, 30, UNIT_SIZE)
-        self.root.games_frame.unbind_all("<Button>")
+        self.root.unbind_all("<Button>")
         self.root.bind_all("<Key>", self.key_press)
         self.me = tanks[0]
         self.testing = True

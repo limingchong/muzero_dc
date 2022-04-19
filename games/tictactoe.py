@@ -1,4 +1,6 @@
 import datetime
+import time
+
 from matplotlib import pyplot
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from AI import *
@@ -355,11 +357,9 @@ class tictactoe_gui:
         self.name = "tictactoe"
         self.play = False
         self.states = []
-        for i in range(3):
-            row = []
-            for j in range(3):
-                row.append(Empty(0, ""))
-            self.states.append(row)
+        self.winfor = 3
+        self.board_width = 3
+        self.board_height = 3
 
     def train(self):
         MuZero("tictactoe").train()
@@ -371,29 +371,177 @@ class tictactoe_gui:
 
         Canvas(self.root, bg="#D8D8D8", height=5, width=700).place(x=30, y=70)
 
-        Canvas(self.root, bg="#D8D8D8", height=470, width=123).place(x=30, y=100)
+        Canvas(self.root, bg="#D8D8D8", height=400, width=123).place(x=30, y=100)
 
         Canvas(self.root, bg="#D8D8D8", height=470, width=552).place(x=180, y=100)
 
+        v_name = StringVar(value=self.name)
+        v_winfor = StringVar(value=self.winfor)
+        v_width = StringVar(value=self.board_width)
+        v_height = StringVar(value=self.board_height)
+        v_play = StringVar(value=self.play)
+        v_maxmove = StringVar(value=MuZeroConfig().max_moves)
+
+        v_net = StringVar(value=MuZeroConfig().network)
+        v_channels = StringVar(value=MuZeroConfig().channels)
+        v_learn = StringVar(value=MuZeroConfig().lr_init)
+        v_decay = StringVar(value=MuZeroConfig().lr_decay_rate)
+        v_decay_step = StringVar(value=MuZeroConfig().lr_decay_steps)
+        v_decay_weight = StringVar(value=MuZeroConfig().value_loss_weight)
+
         Label(self.root,
               text="游戏名",
-              font=("microsoft yahei", "12"),
+              font=("microsoft yahei", "16"),
               wraplength=450,
               bg="#D8D8D8",
               justify="left").place(x=200, y=120)
+        Label(self.root,
+              text="胜利子数",
+              font=("microsoft yahei", "16"),
+              wraplength=450,
+              bg="#D8D8D8",
+              justify="left").place(x=200, y=190)
+        Label(self.root,
+              text="棋盘宽度",
+              font=("microsoft yahei", "16"),
+              wraplength=450,
+              bg="#D8D8D8",
+              justify="left").place(x=200, y=260)
+        Label(self.root,
+              text="棋盘高度",
+              font=("microsoft yahei", "16"),
+              wraplength=450,
+              bg="#D8D8D8",
+              justify="left").place(x=200, y=330)
+        Label(self.root,
+              text="玩家先手",
+              font=("microsoft yahei", "16"),
+              wraplength=450,
+              bg="#D8D8D8",
+              justify="left").place(x=200, y=400)
+        Label(self.root,
+              text="最多移动",
+              font=("microsoft yahei", "16"),
+              wraplength=450,
+              bg="#D8D8D8",
+              justify="left").place(x=200, y=470)
 
-        v_1 = StringVar()
-        v_1.set(MuZeroConfig().network)
+        Label(self.root,
+              text="训练网络",
+              font=("microsoft yahei", "16"),
+              wraplength=450,
+              bg="#D8D8D8",
+              justify="left").place(x=500, y=120)
+        Label(self.root,
+              text="通道数",
+              font=("microsoft yahei", "16"),
+              wraplength=450,
+              bg="#D8D8D8",
+              justify="left").place(x=500, y=190)
+        Label(self.root,
+              text="初始学习",
+              font=("microsoft yahei", "16"),
+              wraplength=450,
+              bg="#D8D8D8",
+              justify="left").place(x=500, y=260)
+        Label(self.root,
+              text="衰减率",
+              font=("microsoft yahei", "16"),
+              wraplength=450,
+              bg="#D8D8D8",
+              justify="left").place(x=500, y=330)
+        Label(self.root,
+              text="衰减步数",
+              font=("microsoft yahei", "16"),
+              wraplength=450,
+              bg="#D8D8D8",
+              justify="left").place(x=500, y=400)
+        Label(self.root,
+              text="衰减权重",
+              font=("microsoft yahei", "16"),
+              wraplength=450,
+              bg="#D8D8D8",
+              justify="left").place(x=500, y=470)
 
         Entry(self.root,
-              textvariable=v_1,
-              width=15,
-              borderwidth=0).place(x=270, y=125)
+              textvariable=v_name,
+              font=("microsoft yahei", "16"),
+              width=10,
+              borderwidth=0).place(x=300, y=125)
+        Entry(self.root,
+              textvariable=v_winfor,
+              font=("microsoft yahei", "16"),
+              width=10,
+              borderwidth=0).place(x=300, y=195)
+        Entry(self.root,
+              textvariable=v_width,
+              font=("microsoft yahei", "16"),
+              width=10,
+              borderwidth=0).place(x=300, y=265)
+        Entry(self.root,
+              textvariable=v_height,
+              font=("microsoft yahei", "16"),
+              width=10,
+              borderwidth=0).place(x=300, y=335)
+        Entry(self.root,
+              textvariable=v_play,
+              font=("microsoft yahei", "16"),
+              width=10,
+              borderwidth=0).place(x=300, y=405)
+        Entry(self.root,
+              textvariable=v_maxmove,
+              font=("microsoft yahei", "16"),
+              width=10,
+              borderwidth=0).place(x=300, y=475)
+
+        Entry(self.root,
+              textvariable=v_net,
+              font=("microsoft yahei", "16"),
+              width=10,
+              borderwidth=0).place(x=600, y=125)
+        Entry(self.root,
+              textvariable=v_channels,
+              font=("microsoft yahei", "16"),
+              width=10,
+              borderwidth=0).place(x=600, y=195)
+        Entry(self.root,
+              textvariable=v_learn,
+              font=("microsoft yahei", "16"),
+              width=10,
+              borderwidth=0).place(x=600, y=265)
+        Entry(self.root,
+              textvariable=v_decay,
+              font=("microsoft yahei", "16"),
+              width=10,
+              borderwidth=0).place(x=600, y=335)
+        Entry(self.root,
+              textvariable=v_decay_step,
+              font=("microsoft yahei", "16"),
+              width=10,
+              borderwidth=0).place(x=600, y=405)
+        Entry(self.root,
+              textvariable=v_decay_weight,
+              font=("microsoft yahei", "16"),
+              width=10,
+              borderwidth=0).place(x=600, y=475)
 
         Label(self.root, image=img, width=100, height=100, bd=2, relief="solid").place(x=40, y=110)
 
+        Button(self.root, text="保存", bg="#D8D8D8", borderwidth=2, fg="black", justify="center", width=8,
+               font=("microsoft yahei", "12")).place(x=45, y=300)
+        Button(self.root, text="另存", bg="#D8D8D8", borderwidth=2, fg="black", justify="center", width=8,
+               font=("microsoft yahei", "12")).place(x=45, y=350)
+        Button(self.root, text="读取", bg="#D8D8D8", borderwidth=2, fg="black", justify="center", width=8,
+               font=("microsoft yahei", "12")).place(x=45, y=400)
+        Button(self.root, text="重置", bg="#D8D8D8", borderwidth=2, fg="black", justify="center", width=8,
+               font=("microsoft yahei", "12")).place(x=45, y=450)
+
+        Button(self.root, text="关于我们", bg="#D8D8D8", borderwidth=0, fg="black", justify="center", width=8,
+               font=("microsoft yahei", "12")).place(x=45, y=530)
+
     def detail(self, img):
         self.root.clear_all()
+        self.root.bind_all("<Button>", self.button_press)
 
         Label(self.root, text="Tic Tac Toe", font=("Times New Roman", "25"), bg="#FFFFFF").place(x=40, y=20)
 
@@ -438,11 +586,11 @@ class tictactoe_gui:
 
         total_win = 0
         horizontal_line = []
-        for i in range(checkpoint["num_played_games"]):
+        for i in range(checkpoint["num_played_games"] - len(replay_buffer) + 7, checkpoint["num_played_games"]):
             x.append(i)
             steps = len(replay_buffer[i].reward_history)
-            win = 1 if replay_buffer[i].to_play_history[steps - 1] == 1 else -1
-            total_win += win
+            if replay_buffer[i].to_play_history[steps - 1] == 1:
+                total_win += 1
             y.append(total_win / (i + 1))
             horizontal_line.append(0.5)
 
@@ -472,6 +620,12 @@ class tictactoe_gui:
         plot_show.get_tk_widget().config(width=300, height=200)
 
     def test(self):
+        for i in range(3):
+            row = []
+            for j in range(3):
+                row.append(Empty(0, ""))
+            self.states.append(row)
+
         self.ai = AI(self, MuZeroConfig(), 666)
         self.game_history = GameHistory()
         self.game_history.action_history.append(0)
